@@ -3,8 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- PWA Meta -->
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ยืม-คืนเครื่องมือ">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0F7A5A">
+<meta name="description" content="ระบบยืม-คืนเครื่องมือส่วนกลาง">
 <title>ระบบยืม-คืนเครื่องมือส่วนกลาง</title>
+<!-- PWA Manifest (inline via blob) -->
+<script>
+(function(){
+  const manifest = {
+    name: "ระบบยืม-คืนเครื่องมือส่วนกลาง",
+    short_name: "ยืม-คืนเครื่องมือ",
+    description: "ระบบบริหารจัดการการยืม-คืนเครื่องมือส่วนกลาง",
+    start_url: "./",
+    display: "standalone",
+    orientation: "portrait-primary",
+    background_color: "#F8F7F4",
+    theme_color: "#0F7A5A",
+    lang: "th",
+    icons: [
+      { src: _genIcon(192,"#0F7A5A"), sizes:"192x192", type:"image/png", purpose:"any maskable" },
+      { src: _genIcon(512,"#0F7A5A"), sizes:"512x512", type:"image/png", purpose:"any maskable" }
+    ]
+  };
+  function _genIcon(size, color){
+    const c=document.createElement('canvas');c.width=size;c.height=size;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle=color;ctx.fillRect(0,0,size,size);
+    const r=size*0.18;
+    ctx.fillStyle='#fff';ctx.font=`bold ${size*0.45}px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('🔧',size/2,size/2);
+    return c.toDataURL('image/png');
+  }
+  // inject apple touch icons
+  ['192','512'].forEach(s=>{
+    const sz=parseInt(s);
+    const c=document.createElement('canvas');c.width=sz;c.height=sz;
+    const ctx=c.getContext('2d');
+    ctx.fillStyle='#0F7A5A';ctx.fillRect(0,0,sz,sz);
+    ctx.font=`bold ${sz*0.45}px sans-serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('🔧',sz/2,sz/2);
+    const url=c.toDataURL('image/png');
+    manifest.icons[sz===192?0:1].src=url;
+    if(sz===192){
+      const lnk=document.createElement('link');
+      lnk.rel='apple-touch-icon';lnk.href=url;
+      document.head.appendChild(lnk);
+    }
+  });
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const lnk=document.createElement('link');lnk.rel='manifest';lnk.href=url;
+  document.head.appendChild(lnk);
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -1225,8 +1282,90 @@ setInterval(renderActLog, 30000);
 document.addEventListener('DOMContentLoaded', function(){
   loadData();
   loadActLog();
+  registerSW();
 });
+
+// ── PWA SERVICE WORKER ──
+function registerSW(){
+  if(!('serviceWorker' in navigator)) return;
+  const swCode = `
+const CACHE='tool-tracker-pwa-v1';
+const ASSETS=[
+  './',
+  'https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
+];
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));
+  self.skipWaiting();
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  self.clients.claim();
+});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  e.respondWith(
+    caches.match(e.request).then(cached=>{
+      const fresh=fetch(e.request).then(res=>{
+        if(res&&res.status===200){
+          const clone=res.clone();
+          caches.open(CACHE).then(c=>c.put(e.request,clone));
+        }
+        return res;
+      }).catch(()=>cached);
+      return cached||fresh;
+    })
+  );
+});
+  `;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  const url=URL.createObjectURL(blob);
+  navigator.serviceWorker.register(url,{scope:'./'})
+    .then(()=>console.log('[PWA] Service Worker registered'))
+    .catch(e=>console.warn('[PWA] SW error:',e));
+}
+
+// ── PWA INSTALL PROMPT ──
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();deferredPrompt=e;
+  showInstallBanner();
+});
+window.addEventListener('appinstalled',()=>{
+  hideInstallBanner();deferredPrompt=null;
+});
+
+function showInstallBanner(){
+  if(document.getElementById('pwa-banner'))return;
+  const b=document.createElement('div');
+  b.id='pwa-banner';
+  b.style.cssText=`
+    position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
+    background:#0F7A5A;color:#fff;border-radius:14px;
+    padding:12px 18px;display:flex;align-items:center;gap:12px;
+    box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:9999;
+    font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;
+    max-width:320px;width:calc(100% - 40px);animation:slideUp .3s ease;
+  `;
+  b.innerHTML=`
+    <span style="font-size:22px">📲</span>
+    <div style="flex:1;line-height:1.4">
+      <div style="font-weight:700;font-size:14px">ติดตั้งแอปบนมือถือ</div>
+      <div style="opacity:.85;font-size:12px">ใช้งานได้แม้ไม่มีอินเทอร์เน็ต</div>
+    </div>
+    <button onclick="installPWA()" style="background:#fff;color:#0F7A5A;border:none;border-radius:8px;padding:7px 14px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">ติดตั้ง</button>
+    <button onclick="hideInstallBanner()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 2px;opacity:.7;line-height:1">×</button>
+  `;
+  document.body.appendChild(b);
+}
+function hideInstallBanner(){
+  const b=document.getElementById('pwa-banner');if(b)b.remove();
+}
+function installPWA(){
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;hideInstallBanner();});
+}
 </script>
 </body>
 </html>
-
