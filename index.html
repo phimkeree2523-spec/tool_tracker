@@ -400,7 +400,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
 .act-main b{font-weight:600}
 .act-sub{font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .act-time{font-size:10.5px;color:var(--text3);white-space:nowrap;flex-shrink:0;margin-top:3px;text-align:right;min-width:90px}
-.act-new-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-mid);flex-shrink:0;margin-top:6px;box-shadow:0 0 0 3px var(--brand-light)}
+.act-new-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-mid);flex-shrink:0;margin-top:6px;box-shadow:0 0 0 3px var(--brand-light);align-self:center;margin-top:0}
 .activity-empty{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
 
 /* ── TOOL STATUS WARNING ── */
@@ -542,7 +542,8 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
       </div>
     </div>
     <div class="activity-body" id="act-body">
-      <div class="activity-empty" id="act-empty">ยังไม่มีกิจกรรม</div>
+      <div class="activity-empty" id="act-empty" style="display:none">ยังไม่มีกิจกรรม</div>
+      <div id="act-list"></div>
     </div>
   </div>
 </div>
@@ -716,7 +717,7 @@ const SEED=[
   {id:'TL-008',name:'เครื่องวัดอุณหภูมิ IR',cat:'เครื่องมือวัด',status:'available',user:null,dept:null,loc:null,from:null,due:null,note:null,img:null,hist:[]},
 ];
 
-let tools=[],isAdmin=false,pg=1,editIdx=null,retIdx=null,pendImg=null,tipKeep=false,tipTO=null;
+let tools=[],isAdmin=false,pg=1,editIdx=null,editId=null,retIdx=null,pendImg=null,tipKeep=false,tipTO=null;
 const PER=8;
 
 function loadData(){
@@ -730,7 +731,7 @@ function loadData(){
 }
 function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tools));}catch(e){}}
 
-function clkTick(){const n=new Date();document.getElementById('clk').textContent=n.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+function clkTick(){const el=document.getElementById('clk');if(!el)return;const n=new Date();el.textContent=n.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 setInterval(clkTick,1000);clkTick();
 
 function toggleAdmin(){if(isAdmin){isAdmin=false;updAdmin();}else{document.getElementById('lp').value='';document.getElementById('l-err').style.display='none';openOv('ov-login');setTimeout(()=>document.getElementById('lp').focus(),80);}}
@@ -765,7 +766,7 @@ function render(){
   const tbody=document.getElementById('tbody');
   document.getElementById('empty-state').style.display=paged.length===0?'':'none';
   tbody.innerHTML=paged.map(t=>{
-    const ri=tools.indexOf(t),over=isOver(t.due,t.status);
+    const ri=tools.findIndex(x=>x.id===t.id),over=isOver(t.due,t.status);
     const dot=t.img?`<span style="width:6px;height:6px;border-radius:50%;background:var(--brand);display:inline-block;margin-left:4px;vertical-align:middle;box-shadow:0 0 0 2px var(--brand-light)"></span>`:'';
     let acts='';
     if(t.status==='available')acts+=`<button class="ab borrow-btn" onclick="openReturnOrBorrow(${ri},'borrow')">ยืม</button>`;
@@ -787,7 +788,7 @@ function render(){
   const mc=document.getElementById('mobile-cards');
   document.getElementById('empty-state-m').style.display=paged.length===0?'':'none';
   mc.innerHTML=paged.map(t=>{
-    const ri=tools.indexOf(t),over=isOver(t.due,t.status);
+    const ri=tools.findIndex(x=>x.id===t.id),over=isOver(t.due,t.status);
     const dot=t.img?`<span style="width:7px;height:7px;border-radius:50%;background:var(--brand);display:inline-block;margin-left:5px;vertical-align:middle"></span>`:'';
     let acts='';
     if(t.status==='available')acts+=`<button class="ab borrow-btn" onclick="openReturnOrBorrow(${ri},'borrow')">ยืม</button>`;
@@ -899,6 +900,11 @@ function checkToolStatus(val){
     box.innerHTML = '<span class="tool-status-box-icon">🔧</span> เครื่องมือนี้<b>อยู่ระหว่างซ่อมบำรุง</b> ไม่สามารถยืมได้';
     box.style.display = '';
     if(confirmBtn) confirmBtn.disabled = true;
+  } else if(t.status === 'returned'){
+    box.className = 'tool-status-box available';
+    box.innerHTML = '<span class="tool-status-box-icon">↩️</span> เครื่องมือนี้<b>เพิ่งถูกคืนแล้ว</b> สามารถยืมได้ทันที';
+    box.style.display = '';
+    if(confirmBtn) confirmBtn.disabled = false;
   } else {
     box.style.display = 'none';
     if(confirmBtn) confirmBtn.disabled = false;
@@ -922,7 +928,7 @@ function openBorrow(preselect){
     o.value=i;
     const statusLabel = t.status==='available'?'✅ ว่าง': t.status==='in-use'?'⚠️ กำลังใช้': t.status==='maintenance'?'🔧 ซ่อม':'↩️ คืนแล้ว';
     o.textContent=`${t.name} (${t.id}) — ${statusLabel}`;
-    if(t.status!=='available') o.style.color='#9CA3AF';
+    if(t.status!=='available'&&t.status!=='returned') o.style.color='#9CA3AF';
     sel.appendChild(o);
   });
   if(typeof preselect!=='undefined'){
@@ -956,7 +962,7 @@ function saveBorrow(){
   const idx=parseInt(ti);
   const t=tools[idx];
   if(!t){errEl.textContent='ไม่พบเครื่องมือ กรุณาเลือกใหม่';errEl.style.display='';return;}
-  if(t.status!=='available'){
+  if(t.status!=='available'&&t.status!=='returned'){
     errEl.textContent='เครื่องมือนี้ไม่ว่าง กรุณาเลือกเครื่องมืออื่น';
     errEl.style.display='';return;
   }
@@ -1007,7 +1013,7 @@ function showHist(ri){
   openOv('ov-hist');
 }
 function openAdd(){
-  editIdx=null;pendImg=null;
+  editIdx=null;editId=null;pendImg=null;
   document.getElementById('add-title').textContent='เพิ่มเครื่องมือใหม่';
   ['a-name','a-code','a-cat'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('a-status').value='available';
@@ -1021,7 +1027,7 @@ function openAdd(){
   openOv('ov-add');
 }
 function openEdit(ri){
-  editIdx=ri;pendImg=null;const t=tools[ri];
+  editIdx=ri;editId=tools[ri]?tools[ri].id:null;pendImg=null;const t=tools[ri];
   document.getElementById('add-title').textContent='แก้ไข: '+t.name;
   document.getElementById('a-name').value=t.name;
   document.getElementById('a-code').value=t.id;
@@ -1077,27 +1083,34 @@ function clearImg(){
 function saveTool(){
   const name=document.getElementById('a-name').value.trim(),code=document.getElementById('a-code').value.trim();
   if(!name||!code){document.getElementById('a-err').style.display='';return;}
-  if(editIdx!==null){
-    const t=tools[editIdx];t.name=name;t.id=code;t.cat=document.getElementById('a-cat').value.trim();t.status=document.getElementById('a-status').value;
+  if(editId!==null){
+    const realIdx=tools.findIndex(x=>x.id===editId);
+    if(realIdx===-1){document.getElementById('a-err').style.display='';return;}
+    const t=tools[realIdx];t.name=name;t.id=code;t.cat=document.getElementById('a-cat').value.trim();t.status=document.getElementById('a-status').value;
     if(pendImg==='__clear__')t.img=null;
     else if(pendImg!==null)t.img=pendImg;
   } else {
     tools.push({id:code,name,cat:document.getElementById('a-cat').value.trim(),status:document.getElementById('a-status').value,user:null,dept:null,loc:null,from:null,due:null,note:null,img:pendImg==='__clear__'?null:pendImg,hist:[]});
   }
   saveData();
-  if(editIdx!==null){
-    pushAct('edit', `Admin แก้ไข <b>${name}</b>`, `รหัส: ${code}`);
+  if(editId!==null){
+    pushAct('edit',`Admin แก้ไข <b>${name}</b>`,`รหัส: ${code}`);
   } else {
-    pushAct('add', `Admin เพิ่มเครื่องมือ <b>${name}</b>`, `รหัส: ${code}`);
+    pushAct('add',`Admin เพิ่มเครื่องมือ <b>${name}</b>`,`รหัส: ${code}`);
   }
-  closeOv('ov-add');editIdx=null;pendImg=null;render();
+  closeOv('ov-add');editIdx=null;editId=null;pendImg=null;render();
 }
 function deleteTool(){
-  if(editIdx===null)return;
-  if(!confirm('ต้องการลบเครื่องมือนี้ใช่ไหม?'))return;
-  const delName = tools[editIdx].name;
-  tools.splice(editIdx,1);saveData();
-  pushAct('delete', `Admin ลบเครื่องมือ <b>${delName}</b>`, '');
+  if(!isAdmin){alert('กรุณาเข้าสู่ระบบ Admin ก่อน');return;}
+  if(editIdx===null||editIdx<0||editIdx>=tools.length)return;
+  const delName=tools[editIdx].name;
+  const delId=tools[editIdx].id;
+  if(!confirm('ต้องการลบ "'+delName+'" ใช่ไหม?'))return;
+  const realIdx=tools.findIndex(x=>x.id===delId);
+  if(realIdx===-1)return;
+  tools.splice(realIdx,1);
+  saveData();
+  pushAct('delete',`Admin ลบเครื่องมือ <b>${delName}</b>`,'');
   closeOv('ov-add');editIdx=null;render();
 }
 
@@ -1159,18 +1172,20 @@ function fmtRelTime(iso){
 }
 
 function renderActLog(){
-  const body = document.getElementById('act-body');
+  const list = document.getElementById('act-list');
   const empty = document.getElementById('act-empty');
   const count = document.getElementById('act-count');
+  if(!list||!empty||!count) return;
   count.textContent = actLog.length;
 
   if(actLog.length === 0){
     empty.style.display = '';
+    list.innerHTML = '';
     return;
   }
   empty.style.display = 'none';
 
-  body.innerHTML = actLog.map((a, i) => {
+  list.innerHTML = actLog.map((a, i) => {
     const ic = ACT_ICONS[a.type] || {cls:'edit', icon:'📌'};
     const newDot = i === 0 ? '<span class="act-new-dot"></span>' : '';
     return `<div class="act-row">
@@ -1207,9 +1222,10 @@ function toggleActivityLog(){
 // Auto refresh relative times every 30s
 setInterval(renderActLog, 30000);
 
-
-loadData();
-loadActLog();
+document.addEventListener('DOMContentLoaded', function(){
+  loadData();
+  loadActLog();
+});
 </script>
 </body>
 </html>
