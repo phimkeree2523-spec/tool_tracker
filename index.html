@@ -11,55 +11,41 @@
 <meta name="theme-color" content="#0F7A5A">
 <meta name="description" content="ระบบยืม-คืนเครื่องมือส่วนกลาง">
 <title>ระบบยืม-คืนเครื่องมือส่วนกลาง</title>
-<!-- PWA Manifest (inline via blob) -->
+<!-- PWA Manifest (inline via data URL) -->
 <script>
 (function(){
-  const manifest = {
-    name: "ระบบยืม-คืนเครื่องมือส่วนกลาง",
-    short_name: "ยืม-คืนเครื่องมือ",
-    description: "ระบบบริหารจัดการการยืม-คืนเครื่องมือส่วนกลาง",
-    start_url: "./",
-    display: "standalone",
-    orientation: "portrait-primary",
-    background_color: "#F8F7F4",
-    theme_color: "#0F7A5A",
-    lang: "th",
-    icons: [
-      { src: _genIcon(192,"#0F7A5A"), sizes:"192x192", type:"image/png", purpose:"any maskable" },
-      { src: _genIcon(512,"#0F7A5A"), sizes:"512x512", type:"image/png", purpose:"any maskable" }
-    ]
-  };
-  function _genIcon(size, color){
+  function genIcon(size){
     const c=document.createElement('canvas');c.width=size;c.height=size;
     const ctx=c.getContext('2d');
-    ctx.fillStyle=color;ctx.fillRect(0,0,size,size);
-    const r=size*0.18;
-    ctx.fillStyle='#fff';ctx.font=`bold ${size*0.45}px sans-serif`;
+    ctx.fillStyle='#0F7A5A';ctx.fillRect(0,0,size,size);
+    ctx.font=`bold ${size*0.45}px sans-serif`;
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('🔧',size/2,size/2);
     return c.toDataURL('image/png');
   }
-  // inject apple touch icons
-  ['192','512'].forEach(s=>{
-    const sz=parseInt(s);
-    const c=document.createElement('canvas');c.width=sz;c.height=sz;
-    const ctx=c.getContext('2d');
-    ctx.fillStyle='#0F7A5A';ctx.fillRect(0,0,sz,sz);
-    ctx.font=`bold ${sz*0.45}px sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('🔧',sz/2,sz/2);
-    const url=c.toDataURL('image/png');
-    manifest.icons[sz===192?0:1].src=url;
-    if(sz===192){
-      const lnk=document.createElement('link');
-      lnk.rel='apple-touch-icon';lnk.href=url;
-      document.head.appendChild(lnk);
-    }
-  });
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const lnk=document.createElement('link');lnk.rel='manifest';lnk.href=url;
-  document.head.appendChild(lnk);
+  const icon192=genIcon(192);
+  const icon512=genIcon(512);
+
+  // Apple touch icon
+  const al=document.createElement('link');al.rel='apple-touch-icon';al.href=icon192;
+  document.head.appendChild(al);
+
+  // Manifest via data URI (works without HTTPS restriction unlike blob:)
+  const manifest={
+    name:"ระบบยืม-คืนเครื่องมือส่วนกลาง",
+    short_name:"ยืม-คืนเครื่องมือ",
+    description:"ระบบบริหารจัดการการยืม-คืนเครื่องมือส่วนกลาง",
+    start_url:"./",display:"standalone",
+    orientation:"portrait-primary",
+    background_color:"#F8F7F4",theme_color:"#0F7A5A",lang:"th",
+    icons:[
+      {src:icon192,sizes:"192x192",type:"image/png",purpose:"any maskable"},
+      {src:icon512,sizes:"512x512",type:"image/png",purpose:"any maskable"}
+    ]
+  };
+  const dataUrl='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(manifest));
+  const ml=document.createElement('link');ml.rel='manifest';ml.href=dataUrl;
+  document.head.appendChild(ml);
 })();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -525,6 +511,10 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
     <button class="pill-btn pill-manual" onclick="openOv('ov-manual')">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>
       <span class="hide-xs">คู่มือ</span>
+    </button>
+    <button class="pill-btn" id="pwa-install-btn" onclick="handleInstallClick()" style="display:none;background:#E0F5ED;color:#0F7A5A;border-color:#27C18A">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 11v1a2 2 0 002 2h8a2 2 0 002-2v-1"/></svg>
+      <span>ติดตั้ง</span>
     </button>
     <button class="pill-btn pill-admin-off" id="admin-btn" onclick="toggleAdmin()">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>
@@ -1287,86 +1277,120 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // ── PWA SERVICE WORKER ──
 function registerSW(){
-  if(!('serviceWorker' in navigator)) return;
-  const swCode = `
-const CACHE='tool-tracker-pwa-v1';
-const ASSETS=[
-  './',
-  'https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap'
-];
-self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS).catch(()=>{})));
-  self.skipWaiting();
-});
-self.addEventListener('activate',e=>{
-  e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-  self.clients.claim();
-});
-self.addEventListener('fetch',e=>{
-  if(e.request.method!=='GET')return;
-  e.respondWith(
-    caches.match(e.request).then(cached=>{
-      const fresh=fetch(e.request).then(res=>{
-        if(res&&res.status===200){
-          const clone=res.clone();
-          caches.open(CACHE).then(c=>c.put(e.request,clone));
-        }
-        return res;
-      }).catch(()=>cached);
-      return cached||fresh;
-    })
-  );
-});
-  `;
-  const blob=new Blob([swCode],{type:'application/javascript'});
-  const url=URL.createObjectURL(blob);
-  navigator.serviceWorker.register(url,{scope:'./'})
-    .then(()=>console.log('[PWA] Service Worker registered'))
-    .catch(e=>console.warn('[PWA] SW error:',e));
+  // Blob URL cannot be used as SW - skip SW registration in single-file mode
+  // Data is stored in localStorage so offline works without SW
 }
 
 // ── PWA INSTALL PROMPT ──
 let deferredPrompt=null;
+
+function detectPlatform(){
+  const ua=navigator.userAgent;
+  if(/iphone|ipad|ipod/i.test(ua))return'ios';
+  if(/android/i.test(ua))return'android';
+  return'other';
+}
+
+function isStandalone(){
+  return window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
+}
+
 window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();deferredPrompt=e;
-  showInstallBanner();
-});
-window.addEventListener('appinstalled',()=>{
-  hideInstallBanner();deferredPrompt=null;
+  e.preventDefault();
+  deferredPrompt=e;
+  // Show install button in top bar
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='';
+  // Show android install button in modal
+  const ab=document.getElementById('pwa-android-btn');
+  if(ab)ab.style.display='';
 });
 
-function showInstallBanner(){
-  if(document.getElementById('pwa-banner'))return;
-  const b=document.createElement('div');
-  b.id='pwa-banner';
-  b.style.cssText=`
-    position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
-    background:#0F7A5A;color:#fff;border-radius:14px;
-    padding:12px 18px;display:flex;align-items:center;gap:12px;
-    box-shadow:0 6px 24px rgba(0,0,0,.2);z-index:9999;
-    font-family:'Sarabun',sans-serif;font-size:13px;font-weight:500;
-    max-width:320px;width:calc(100% - 40px);animation:slideUp .3s ease;
-  `;
-  b.innerHTML=`
-    <span style="font-size:22px">📲</span>
-    <div style="flex:1;line-height:1.4">
-      <div style="font-weight:700;font-size:14px">ติดตั้งแอปบนมือถือ</div>
-      <div style="opacity:.85;font-size:12px">ใช้งานได้แม้ไม่มีอินเทอร์เน็ต</div>
-    </div>
-    <button onclick="installPWA()" style="background:#fff;color:#0F7A5A;border:none;border-radius:8px;padding:7px 14px;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap">ติดตั้ง</button>
-    <button onclick="hideInstallBanner()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 2px;opacity:.7;line-height:1">×</button>
-  `;
-  document.body.appendChild(b);
+window.addEventListener('appinstalled',()=>{
+  deferredPrompt=null;
+  const btn=document.getElementById('pwa-install-btn');
+  if(btn)btn.style.display='none';
+});
+
+function handleInstallClick(){
+  openOv('ov-pwa');
+  // If Android with prompt ready, show install button in modal
+  if(deferredPrompt){
+    const ab=document.getElementById('pwa-android-btn');
+    if(ab)ab.style.display='';
+  }
 }
-function hideInstallBanner(){
-  const b=document.getElementById('pwa-banner');if(b)b.remove();
-}
-function installPWA(){
+
+function triggerAndroidInstall(){
   if(!deferredPrompt)return;
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(()=>{deferredPrompt=null;hideInstallBanner();});
+  deferredPrompt.userChoice.then(choice=>{
+    if(choice.outcome==='accepted'){
+      closeOv('ov-pwa');
+      const btn=document.getElementById('pwa-install-btn');
+      if(btn)btn.style.display='none';
+    }
+    deferredPrompt=null;
+  });
 }
+
+// Show install button if iOS and not standalone
+document.addEventListener('DOMContentLoaded',()=>{
+  if(detectPlatform()==='ios'&&!isStandalone()){
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn)btn.style.display='';
+  }
+});
 </script>
+<!-- PWA INSTALL MODAL -->
+<div class="overlay" id="ov-pwa" onclick="if(event.target===this)closeOv('ov-pwa')">
+  <div class="modal" style="max-width:340px" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <h3>📲 ติดตั้งแอปบนมือถือ</h3>
+    <div id="pwa-ios-guide">
+      <div style="background:var(--info-bg);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--info-txt);line-height:1.6">
+        ใช้งานได้เหมือนแอปจริง ไม่ต้องเปิด Browser และทำงานได้แม้ไม่มีสัญญาณอินเทอร์เน็ต
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">🍎 iPhone / iPad (Safari)</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">1</div>
+          <div style="font-size:13px">กดปุ่ม <b>Share</b> <span style="font-size:16px">⬆️</span> ที่แถบล่างของ Safari</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">2</div>
+          <div style="font-size:13px">เลื่อนลงแล้วกด <b>"Add to Home Screen"</b> <span style="font-size:14px">➕</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">3</div>
+          <div style="font-size:13px">กด <b>"Add"</b> มุมขวาบน แล้วแอปจะปรากฏบน Home Screen</div>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">🤖 Android (Chrome)</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">1</div>
+          <div style="font-size:13px">กดเมนู <b>⋮</b> มุมขวาบนของ Chrome</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">2</div>
+          <div style="font-size:13px">เลือก <b>"Add to Home screen"</b> หรือ <b>"ติดตั้งแอป"</b></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
+          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">3</div>
+          <div style="font-size:13px">กด <b>"ติดตั้ง"</b> เพื่อยืนยัน</div>
+        </div>
+      </div>
+      <div style="font-size:11.5px;color:var(--text3);text-align:center;line-height:1.6;background:var(--bg);padding:8px 12px;border-radius:var(--r-sm)">
+        ⚠️ ต้องเปิดผ่าน <b>HTTPS</b> เท่านั้น จึงจะติดตั้งได้<br>หากเปิดจาก <code>file://</code> จะไม่สามารถติดตั้งได้
+      </div>
+    </div>
+    <div class="mbtns" style="margin-top:16px">
+      <button class="btn-ok" id="pwa-android-btn" style="display:none" onclick="triggerAndroidInstall()">📲 ติดตั้งเลย</button>
+      <button class="btn-cancel" onclick="closeOv('ov-pwa')">ปิด</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
-
