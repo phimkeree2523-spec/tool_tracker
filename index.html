@@ -50,6 +50,12 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, push, off, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  window._fbImports = { initializeApp, getDatabase, ref, onValue, set, push, off, onDisconnect, serverTimestamp };
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -467,7 +473,45 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
 .tool-status-box-icon{font-size:16px;margin-right:4px}
 
 
-/* ── MOBILE BOTTOM NAV ── */
+/* ── FIREBASE SETUP SCREEN ── */
+#fb-setup-screen{
+  position:fixed;inset:0;background:var(--bg);z-index:9999;
+  display:flex;align-items:center;justify-content:center;padding:20px
+}
+.fb-setup-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:28px 24px;width:100%;max-width:480px;
+  box-shadow:var(--shadow-lg)
+}
+.fb-setup-card h2{font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.fb-setup-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.fb-setup-steps{background:var(--bg);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--text2);border:1px solid var(--border2)}
+.fb-setup-steps b{color:var(--text)}
+.fb-setup-steps a{color:var(--brand);text-decoration:none;font-weight:500}
+.fb-setup-steps a:hover{text-decoration:underline}
+.fb-setup-card .field{margin-bottom:10px}
+.fb-setup-card label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:4px}
+.fb-setup-card input{
+  width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;
+  padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  background:var(--bg);color:var(--text)
+}
+.fb-setup-card input:focus{outline:none;border-color:var(--brand)}
+#fb-connect-err{font-size:12px;color:var(--danger-txt);margin-bottom:10px;display:none;font-weight:500;background:var(--danger-bg);padding:8px 12px;border-radius:var(--r-xs)}
+/* ── CONNECTION STATUS ── */
+.conn-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:11px;font-weight:600;padding:3px 10px;
+  border-radius:20px;transition:all .3s
+}
+.conn-badge.online{background:#DCFCE7;color:#166534;border:1px solid #86EFAC}
+.conn-badge.offline{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
+.conn-badge.connecting{background:#FEF3E2;color:#92400E;border:1px solid #FCD34D}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
+/* ── REALTIME FLASH ── */
+@keyframes flashRow{0%{background:#E0F5ED}100%{background:transparent}}
+.rt-flash{animation:flashRow .8s ease}
+
 .mobile-fab{
   display:flex;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
   background:var(--brand);color:#fff;border:none;border-radius:30px;
@@ -508,6 +552,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
   </div>
   <div class="top-right">
     <span class="clock" id="clk"></span>
+    <span class="conn-badge connecting" id="conn-badge"><span class="conn-dot"></span><span id="conn-txt">กำลังเชื่อมต่อ...</span></span>
     <button class="pill-btn pill-manual" onclick="openOv('ov-manual')">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>
       <span class="hide-xs">คู่มือ</span>
@@ -543,6 +588,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
   </select>
   <button class="btn-green" onclick="openBorrow()" id="main-borrow-btn">+ ยืมเครื่องมือ</button>
   <button class="btn-gray" id="admin-add-btn" onclick="openAdd()">+ เพิ่มเครื่องมือ</button>
+  <button class="btn-gray" id="fb-reset-btn" onclick="resetFirebaseConfig()" style="display:none;background:#4B5563">🔥 เปลี่ยน DB</button>
 </div>
 
 <!-- TABLE CARD -->
@@ -752,6 +798,7 @@ const ADMIN_PASS='admin1234';
 const STATUS_TH={'available':'ว่าง','in-use':'กำลังใช้งาน','maintenance':'ซ่อมบำรุง','returned':'คืนแล้ว'};
 const LOC_DOTS=['d-blue','d-amber','d-purple','d-teal','d-pink'];
 const STORAGE_KEY='tool-tracker-v3'; // v3: fixed index bug
+const FB_CONFIG_KEY='tool-tracker-firebase-config';
 
 const SEED=[
   {id:'TL-001',name:'เครื่องวัดความดัน',cat:'เครื่องมือวัด',status:'in-use',user:'สมชาย มีสุข',dept:'แผนกผลิต',loc:'โรงงาน A',from:'2026-04-25',due:'2026-05-05',note:'ตรวจสอบระบบท่อ',img:null,hist:[{act:'ยืม',user:'สมชาย มีสุข',dept:'แผนกผลิต',date:'2026-04-25',loc:'โรงงาน A',note:'ตรวจสอบระบบท่อ'}]},
@@ -767,7 +814,126 @@ const SEED=[
 let tools=[],isAdmin=false,pg=1,editIdx=null,editId=null,retIdx=null,pendImg=null,tipKeep=false,tipTO=null;
 const PER=8;
 
+// ── FIREBASE STATE ──
+let fbApp=null, fbDb=null, fbRef=null, fbActRef=null, fbPrefix='', useFirebase=false;
+
+// ── FIREBASE SETUP ──
+function connectFirebase(){
+  const url=(document.getElementById('fb-url-inp').value||'').trim().replace(/\/+$/,'');
+  const prefix=(document.getElementById('fb-prefix-inp').value||'').trim().replace(/[^a-zA-Z0-9_-]/g,'');
+  const errEl=document.getElementById('fb-connect-err');
+  errEl.style.display='none';
+  if(!url||!url.startsWith('https://')){
+    errEl.textContent='กรุณากรอก Database URL ที่ถูกต้อง (เริ่มด้วย https://)';
+    errEl.style.display='';return;
+  }
+  errEl.textContent='กำลังทดสอบการเชื่อมต่อ...';
+  errEl.style.display='';errEl.style.color='var(--warn-txt)';
+  try{
+    const {initializeApp,getDatabase,ref,onValue,set}=window._fbImports;
+    const cfg={databaseURL:url,apiKey:'placeholder',authDomain:'placeholder',projectId:'placeholder',storageBucket:'placeholder',messagingSenderId:'placeholder',appId:'placeholder'};
+    // Check if already initialized
+    let app;
+    try{app=initializeApp(cfg,'tool-tracker-'+Date.now());}
+    catch(ex){app=initializeApp(cfg);}
+    const db=getDatabase(app);
+    const testRef=ref(db,(prefix?prefix+'/':'')+'tools');
+    // Test connection with timeout
+    const timer=setTimeout(()=>{
+      errEl.textContent='❌ เชื่อมต่อไม่ได้ — ตรวจสอบ Database URL และ Rules ใน Firebase Console';
+      errEl.style.display='';errEl.style.color='var(--danger-txt)';
+    },8000);
+    onValue(testRef,(snap)=>{
+      clearTimeout(timer);
+      localStorage.setItem(FB_CONFIG_KEY,JSON.stringify({url,prefix}));
+      fbApp=app;fbDb=db;fbPrefix=prefix;useFirebase=true;
+      initFirebase();
+    },{onlyOnce:true});
+  }catch(ex){
+    errEl.textContent='❌ เกิดข้อผิดพลาด: '+ex.message;
+    errEl.style.display='';errEl.style.color='var(--danger-txt)';
+  }
+}
+
+function skipFirebase(){
+  useFirebase=false;
+  document.getElementById('fb-setup-screen').style.display='none';
+  setConnStatus('offline');
+  loadLocalData();
+}
+
+function setConnStatus(state){
+  const badge=document.getElementById('conn-badge');
+  const txt=document.getElementById('conn-txt');
+  if(!badge)return;
+  badge.className='conn-badge '+state;
+  if(state==='online'){txt.textContent='Real-time';}
+  else if(state==='offline'){txt.textContent='Local only';}
+  else{txt.textContent='กำลังเชื่อมต่อ...';}
+}
+
+function initFirebase(){
+  document.getElementById('fb-setup-screen').style.display='none';
+  setConnStatus('online');
+  const {ref,onValue,set}=window._fbImports;
+  const basePath=fbPrefix?fbPrefix+'/':'';
+  fbRef=ref(fbDb,basePath+'tools');
+  fbActRef=ref(fbDb,basePath+'actlog');
+
+  // Real-time listener for tools
+  onValue(fbRef,(snap)=>{
+    const data=snap.val();
+    if(data===null){
+      // First time — seed data
+      tools=JSON.parse(JSON.stringify(SEED));
+      set(fbRef,tools);
+    } else if(Array.isArray(data)){
+      tools=data;
+    } else {
+      tools=Object.values(data);
+    }
+    document.getElementById('loading-state').style.display='none';
+    document.getElementById('tbl-inner').style.display='';
+    document.getElementById('mobile-list').style.display='';
+    document.getElementById('pag').style.display='';
+    render();
+  });
+
+  // Real-time listener for actlog
+  onValue(fbActRef,(snap)=>{
+    const data=snap.val();
+    if(data){
+      if(Array.isArray(data)) actLog=data;
+      else actLog=Object.values(data).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    }
+    renderActLog();
+  });
+
+  // Connection state monitor
+  const connRef=ref(fbDb,'.info/connected');
+  onValue(connRef,(snap)=>{
+    setConnStatus(snap.val()?'online':'offline');
+  });
+}
+
 function loadData(){
+  // Check for saved Firebase config
+  const saved=localStorage.getItem(FB_CONFIG_KEY);
+  if(saved){
+    try{
+      const cfg=JSON.parse(saved);
+      document.getElementById('fb-url-inp').value=cfg.url||'';
+      document.getElementById('fb-prefix-inp').value=cfg.prefix||'';
+      // Auto-connect
+      connectFirebase();
+      return;
+    }catch(e){}
+  }
+  // Show setup screen (already visible by default)
+  document.getElementById('loading-state').textContent='กรุณาตั้งค่า Firebase ก่อนใช้งาน';
+}
+
+function loadLocalData(){
   try{const r=localStorage.getItem(STORAGE_KEY);if(r){tools=JSON.parse(r);}else{tools=JSON.parse(JSON.stringify(SEED));saveData();}}
   catch(e){tools=JSON.parse(JSON.stringify(SEED));}
   document.getElementById('loading-state').style.display='none';
@@ -775,18 +941,32 @@ function loadData(){
   document.getElementById('mobile-list').style.display='';
   document.getElementById('pag').style.display='';
   render();
+  loadActLog();
 }
-function saveData(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tools));}catch(e){}}
+
+function saveData(){
+  if(useFirebase && fbRef){
+    const {set}=window._fbImports;
+    set(fbRef,tools).catch(e=>console.warn('Firebase write error:',e));
+  } else {
+    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tools));}catch(e){}
+  }
+}
 
 function clkTick(){const el=document.getElementById('clk');if(!el)return;const n=new Date();el.textContent=n.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 setInterval(clkTick,1000);clkTick();
 
+function resetFirebaseConfig(){
+  if(!confirm('ต้องการเปลี่ยน Firebase Database URL ใช่ไหม?')) return;
+  localStorage.removeItem(FB_CONFIG_KEY);
+  location.reload();
+}
 function toggleAdmin(){if(isAdmin){isAdmin=false;updAdmin();}else{document.getElementById('lp').value='';document.getElementById('l-err').style.display='none';openOv('ov-login');setTimeout(()=>document.getElementById('lp').focus(),80);}}
 function doLogin(){if(document.getElementById('lp').value===ADMIN_PASS){isAdmin=true;closeOv('ov-login');updAdmin();}else{document.getElementById('l-err').style.display='';}}
 function updAdmin(){
-  const b=document.getElementById('admin-btn'),l=document.getElementById('admin-lbl'),ab=document.getElementById('admin-add-btn');
-  if(isAdmin){b.className='pill-btn pill-admin-on';l.textContent='Admin ON';ab.style.display='inline-flex';ab.style.alignItems='center';}
-  else{b.className='pill-btn pill-admin-off';l.textContent='Admin';ab.style.display='none';}
+  const b=document.getElementById('admin-btn'),l=document.getElementById('admin-lbl'),ab=document.getElementById('admin-add-btn'),fb=document.getElementById('fb-reset-btn');
+  if(isAdmin){b.className='pill-btn pill-admin-on';l.textContent='Admin ON';ab.style.display='inline-flex';ab.style.alignItems='center';if(fb&&useFirebase)fb.style.display='inline-flex';}
+  else{b.className='pill-btn pill-admin-off';l.textContent='Admin';ab.style.display='none';if(fb)fb.style.display='none';}
   render();
 }
 function locColor(loc){if(!loc)return'd-teal';let h=0;for(let c of loc)h=(h*31+c.charCodeAt(0))%LOC_DOTS.length;return LOC_DOTS[h];}
@@ -1175,7 +1355,12 @@ function loadActLog(){
 }
 
 function saveActLog(){
-  try{ localStorage.setItem(ACT_KEY, JSON.stringify(actLog.slice(0,100))); } catch(e){}
+  if(useFirebase && fbActRef){
+    const {set}=window._fbImports;
+    set(fbActRef, actLog.slice(0,100)).catch(e=>console.warn('Firebase actlog write error:',e));
+  } else {
+    try{ localStorage.setItem(ACT_KEY, JSON.stringify(actLog.slice(0,100))); } catch(e){}
+  }
 }
 
 function pushAct(type, text, sub){
@@ -1271,7 +1456,7 @@ setInterval(renderActLog, 30000);
 
 document.addEventListener('DOMContentLoaded', function(){
   loadData();
-  loadActLog();
+  if(!useFirebase) loadActLog();
   registerSW();
 });
 
@@ -1391,7 +1576,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     </div>
   </div>
 </div>
+<!-- FIREBASE SETUP SCREEN -->
+<div id="fb-setup-screen">
+  <div class="fb-setup-card">
+    <h2>🔥 ตั้งค่า Firebase Real-time</h2>
+    <p>ระบบนี้ใช้ Firebase Realtime Database เพื่อให้ข้อมูลอัพเดทแบบ Real-time ระหว่างทุกอุปกรณ์ กรุณาสร้างโปรเจกต์ Firebase และกรอกข้อมูลด้านล่าง</p>
+    <div class="fb-setup-steps">
+      <b>วิธีสร้าง Firebase (ฟรี):</b><br>
+      1. ไปที่ <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
+      2. กด <b>"Add project"</b> → ตั้งชื่อ → สร้างโปรเจกต์<br>
+      3. ไปที่ <b>Build → Realtime Database → Create database</b><br>
+      4. เลือก <b>"Start in test mode"</b> (อนุญาตอ่าน/เขียนได้ 30 วัน)<br>
+      5. คัดลอก URL ของ Database เช่น <code>https://xxx-default-rtdb.asia-southeast1.firebasedatabase.app</code><br>
+      6. วางใน <b>Database URL</b> ด้านล่าง แล้วกด <b>"เชื่อมต่อ"</b>
+    </div>
+    <div class="field">
+      <label>Database URL *</label>
+      <input id="fb-url-inp" placeholder="https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="field">
+      <label>Prefix ชื่อข้อมูล (ใช้เมื่อแชร์ DB กับหลายทีม — ไม่บังคับ)</label>
+      <input id="fb-prefix-inp" placeholder="เช่น factory1 หรือ ปล่อยว่างไว้">
+    </div>
+    <div id="fb-connect-err"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-cancel" id="fb-skip-btn" onclick="skipFirebase()" style="height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;cursor:pointer;background:none;color:var(--text2)">ใช้แบบ Local (ไม่ sync)</button>
+      <button class="btn-ok" onclick="connectFirebase()" style="height:40px;padding:0 16px;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer">🔥 เชื่อมต่อ Firebase</button>
+    </div>
+  </div>
+</div>
 
 </body>
-</html>
-
