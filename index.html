@@ -2,1610 +2,475 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<!-- PWA Meta -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#3C3489">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="ยืม-คืนเครื่องมือ">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#0F7A5A">
-<meta name="description" content="ระบบยืม-คืนเครื่องมือส่วนกลาง">
-<title>ระบบยืม-คืนเครื่องมือส่วนกลาง</title>
-<!-- PWA Manifest (inline via data URL) -->
-<script>
-(function(){
-  function genIcon(size){
-    const c=document.createElement('canvas');c.width=size;c.height=size;
-    const ctx=c.getContext('2d');
-    ctx.fillStyle='#0F7A5A';ctx.fillRect(0,0,size,size);
-    ctx.font=`bold ${size*0.45}px sans-serif`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('🔧',size/2,size/2);
-    return c.toDataURL('image/png');
-  }
-  const icon192=genIcon(192);
-  const icon512=genIcon(512);
-
-  // Apple touch icon
-  const al=document.createElement('link');al.rel='apple-touch-icon';al.href=icon192;
-  document.head.appendChild(al);
-
-  // Manifest via data URI (works without HTTPS restriction unlike blob:)
-  const manifest={
-    name:"ระบบยืม-คืนเครื่องมือส่วนกลาง",
-    short_name:"ยืม-คืนเครื่องมือ",
-    description:"ระบบบริหารจัดการการยืม-คืนเครื่องมือส่วนกลาง",
-    start_url:"./",display:"standalone",
-    orientation:"portrait-primary",
-    background_color:"#F8F7F4",theme_color:"#0F7A5A",lang:"th",
-    icons:[
-      {src:icon192,sizes:"192x192",type:"image/png",purpose:"any maskable"},
-      {src:icon512,sizes:"512x512",type:"image/png",purpose:"any maskable"}
-    ]
-  };
-  const dataUrl='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(manifest));
-  const ml=document.createElement('link');ml.rel='manifest';ml.href=dataUrl;
-  document.head.appendChild(ml);
-})();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue, set, push, off, onDisconnect, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  window._fbImports = { initializeApp, getDatabase, ref, onValue, set, push, off, onDisconnect, serverTimestamp };
-</script>
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Task Reminder">
+<meta name="description" content="แอปแจ้งเตือนงานรายวันผ่าน Telegram Bot">
+<title>Daily Task Reminder</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{
-  --brand:#0F7A5A;--brand-d:#0A5740;--brand-light:#E0F5ED;--brand-mid:#27C18A;
-  --warn-bg:#FEF3E2;--warn-txt:#92400E;
-  --danger-bg:#FEE2E2;--danger-txt:#991B1B;
-  --ok-bg:#DCFCE7;--ok-txt:#166534;
-  --idle-bg:#F3F4F6;--idle-txt:#4B5563;
-  --admin-bg:#EDE9FE;--admin-txt:#4C1D95;
-  --info-bg:#DBEAFE;--info-txt:#1E40AF;
-  --bg:#F8F7F4;--surface:#FFFFFF;
-  --border:#E5E3DE;--border2:#EFEDE9;
-  --text:#1C1917;--text2:#6B6360;--text3:#A8A29E;
-  --r:12px;--r-sm:8px;--r-xs:6px;
-  --shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
-  --shadow-lg:0 20px 60px rgba(0,0,0,.16),0 8px 24px rgba(0,0,0,.08);
-}
-html{-webkit-text-size-adjust:100%}
-body{font-family:'Sarabun',sans-serif;font-size:15px;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  :root{
+    --p1:#F3EFFF;--p2:#D9D0F9;--p3:#AFA9EC;--p4:#7F77DD;--pt:#3C3489;--pd:#26215C;
+    --m1:#E1F5EE;--m2:#9FE1CB;--mt:#085041;
+    --a1:#FAEEDA;--a2:#FAC775;--at:#633806;
+    --r1:#FBEAF0;--r2:#F4C0D1;--rt:#72243E;
+    --bg:#F7F5FF;
+    --card:#ffffff;
+    --text:#1a1a2e;
+    --text2:#5c5c7a;
+    --text3:#9b9bb0;
+    --border:#e4e0f7;
+    --radius:14px;
+    --radius-sm:10px;
+  }
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:2rem}
+  a{color:var(--pt)}
 
-/* ── LAYOUT ── */
-.app{max-width:1140px;margin:0 auto;padding:16px 16px 80px}
-@media(min-width:768px){.app{padding:20px 20px 24px}}
+  /* header */
+  .header{background:linear-gradient(135deg,#534AB7 0%,#7F77DD 100%);padding:1.25rem 1.25rem 1rem;position:sticky;top:0;z-index:10}
+  .header-inner{display:flex;align-items:center;gap:10px}
+  .header-icon{width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+  .header-title{color:#fff;font-size:17px;font-weight:600}
+  .header-sub{color:rgba(255,255,255,.7);font-size:12px;margin-top:1px}
 
-/* ── TOP BAR ── */
-.top-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:12px 16px;margin-bottom:12px;
-  box-shadow:var(--shadow);gap:10px;flex-wrap:wrap
-}
-.top-left{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
-.live-dot{width:8px;height:8px;min-width:8px;border-radius:50%;background:var(--brand-mid);animation:pulse 2s infinite;box-shadow:0 0 0 0 rgba(39,193,138,.4)}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(39,193,138,.5)}70%{box-shadow:0 0 0 6px rgba(39,193,138,0)}100%{box-shadow:0 0 0 0 rgba(39,193,138,0)}}
-.app-title{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media(min-width:600px){.app-title{font-size:17px}}
-.clock{font-size:11px;color:var(--text3);font-family:'IBM Plex Mono',monospace;white-space:nowrap;display:none}
-@media(min-width:600px){.clock{display:block}}
-.top-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.pill-btn{
-  display:inline-flex;align-items:center;gap:5px;
-  padding:6px 12px;border-radius:20px;
-  font-size:12px;font-weight:500;cursor:pointer;
-  border:1px solid;font-family:'Sarabun',sans-serif;
-  transition:all .15s;white-space:nowrap;min-height:34px
-}
-.pill-manual{background:var(--info-bg);color:var(--info-txt);border-color:#93C5FD}
-.pill-manual:hover{background:#BFDBFE}
-.pill-admin-off{background:var(--idle-bg);color:var(--idle-txt);border-color:#D1D5DB}
-.pill-admin-off:hover{background:#E5E7EB}
-.pill-admin-on{background:var(--admin-bg);color:var(--admin-txt);border-color:#C4B5FD}
-.pill-btn svg{width:13px;height:13px;flex-shrink:0}
+  /* tabs */
+  .tabs{display:flex;background:rgba(255,255,255,.15);border-radius:10px;margin:10px 0 0;padding:3px}
+  .tab{flex:1;padding:6px;text-align:center;font-size:13px;color:rgba(255,255,255,.7);border-radius:8px;cursor:pointer;transition:.15s;font-weight:500}
+  .tab.active{background:#fff;color:var(--pt)}
 
-/* ── METRICS ── */
-.metrics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-@media(min-width:600px){.metrics{grid-template-columns:repeat(4,1fr)}}
-.metric{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);
-  transition:transform .15s
-}
-.metric:active{transform:scale(.98)}
-.metric-label{font-size:11px;color:var(--text2);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.metric-val{font-size:26px;font-weight:700;line-height:1}
-@media(min-width:600px){.metric-val{font-size:28px}}
+  .page{display:none;padding:1rem}
+  .page.active{display:block}
 
-/* ── CONTROLS ── */
-.ctrl-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
-.ctrl-bar input[type=text]{
-  flex:1;min-width:140px;font-family:'Sarabun',sans-serif;
-  font-size:14px;height:40px;padding:0 12px;
-  border:1px solid var(--border);border-radius:var(--r-sm);
-  background:var(--surface);color:var(--text);transition:border-color .15s
-}
-.ctrl-bar input[type=text]:focus{outline:none;border-color:var(--brand)}
-.ctrl-bar select{
-  font-family:'Sarabun',sans-serif;font-size:13px;height:40px;
-  padding:0 10px;border:1px solid var(--border);border-radius:var(--r-sm);
-  background:var(--surface);color:var(--text);cursor:pointer
-}
-.btn-green{
-  height:40px;padding:0 16px;background:var(--brand);color:#fff;
-  border:none;border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;
-  font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;
-  white-space:nowrap;min-width:max-content
-}
-.btn-green:hover{background:var(--brand-d)}
-.btn-green:active{transform:scale(.97)}
-.btn-gray{
-  height:40px;padding:0 16px;background:#374151;color:#fff;
-  border:none;border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;
-  font-size:14px;font-weight:600;cursor:pointer;display:none;white-space:nowrap;
-  transition:background .15s
-}
-.btn-gray:hover{background:#1F2937}
+  /* card */
+  .card{background:var(--card);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:.875rem;border:0.5px solid var(--border)}
+  .card-title{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:.75rem;display:flex;align-items:center;gap:6px}
 
-/* ── TABLE WRAPPER ── */
-.tbl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden}
+  /* steps */
+  .steps{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+  .step{display:flex;gap:10px;font-size:13px;color:var(--text);line-height:1.5}
+  .step-num{min-width:22px;height:22px;border-radius:50%;background:var(--p2);color:var(--pt);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  code{background:var(--p1);color:var(--pt);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace}
 
-/* ── DESKTOP TABLE ── */
-.desktop-view{display:none}
-@media(min-width:768px){.desktop-view{display:block}.mobile-view{display:none!important}}
-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
-colgroup col:nth-child(1){width:21%}colgroup col:nth-child(2){width:9%}colgroup col:nth-child(3){width:13%}colgroup col:nth-child(4){width:13%}colgroup col:nth-child(5){width:10%}colgroup col:nth-child(6){width:10%}colgroup col:nth-child(7){width:13%}colgroup col:nth-child(8){width:11%}
-thead th{
-  font-size:10.5px;font-weight:600;color:var(--text2);text-align:left;
-  padding:8px 12px;border-bottom:1px solid var(--border);
-  background:var(--bg);text-transform:uppercase;letter-spacing:.05em
-}
-tbody tr{border-bottom:1px solid var(--border2);transition:background .1s}
-tbody tr:last-child{border-bottom:none}
-tbody tr:hover{background:#FAFAF9}
-td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tool-name-link{
-  font-weight:600;cursor:default;color:var(--text);
-  border-bottom:1.5px dashed var(--border);display:inline-block;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;
-  transition:color .12s
-}
-.tool-name-link:hover{color:var(--brand);border-bottom-color:var(--brand)}
-.tool-sub{font-size:10.5px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px}
+  /* inputs */
+  .field{margin-bottom:.75rem}
+  .field-label{font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+  .input-row{display:flex;gap:6px}
+  input[type=text],input[type=password],input[type=time],select{
+    width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);
+    font-size:14px;color:var(--text);background:#fff;outline:none;
+    transition:border .15s,box-shadow .15s;font-family:inherit
+  }
+  input:focus,select:focus{border-color:var(--p3);box-shadow:0 0 0 3px var(--p1)}
+  input[type=time]{width:auto;min-width:100px}
 
-/* ── MOBILE CARD VIEW ── */
-.mobile-view{display:block}
-@media(min-width:768px){.mobile-view{display:none}}
-.m-card{
-  padding:14px 16px;border-bottom:1px solid var(--border2);
-  transition:background .1s;position:relative
-}
-.m-card:last-child{border-bottom:none}
-.m-card:active{background:#FAFAF9}
-.m-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
-.m-card-name{font-weight:600;font-size:15px;color:var(--text);flex:1;min-width:0}
-.m-card-code{font-size:10.5px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-top:2px}
-.m-card-meta{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:10px}
-.m-meta-item{font-size:12px;color:var(--text2);display:flex;gap:4px;align-items:flex-start;overflow:hidden}
-.m-meta-label{color:var(--text3);flex-shrink:0;font-size:11px;padding-top:1px}
-.m-meta-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.m-card-actions{display:flex;gap:7px;flex-wrap:wrap}
+  /* buttons */
+  .btn{padding:10px 16px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
+  .btn:active{transform:scale(.97)}
+  .btn-primary{background:var(--pt);color:#fff}
+  .btn-primary:hover{background:var(--pd)}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed}
+  .btn-ghost{background:var(--p1);color:var(--pt);border:1.5px solid var(--p2)}
+  .btn-ghost:hover{background:var(--p2)}
+  .btn-tg{background:#229ED9;color:#fff;flex:1;justify-content:center}
+  .btn-tg:hover{background:#1a8bbf}
+  .btn-tg:disabled{opacity:.45;cursor:not-allowed}
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap}
 
-/* ── BADGES ── */
-.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap;gap:4px}
-.badge::before{content:"";width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.badge.in-use{background:var(--warn-bg);color:var(--warn-txt)}.badge.in-use::before{background:var(--warn-txt)}
-.badge.available{background:var(--ok-bg);color:var(--ok-txt)}.badge.available::before{background:var(--ok-txt)}
-.badge.maintenance{background:var(--danger-bg);color:var(--danger-txt)}.badge.maintenance::before{background:var(--danger-txt)}
-.badge.returned{background:var(--idle-bg);color:var(--idle-txt)}.badge.returned::before{background:var(--idle-txt)}
+  /* date nav */
+  .date-nav{display:flex;align-items:center;gap:8px;background:var(--m1);border-radius:var(--radius-sm);padding:.6rem .75rem;margin-bottom:1rem}
+  .date-nav button{background:none;border:none;cursor:pointer;color:var(--mt);font-size:22px;line-height:1;padding:0 2px;display:flex;align-items:center}
+  .date-label{flex:1;text-align:center;font-size:14px;font-weight:600;color:var(--mt)}
 
-.ldot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:middle;flex-shrink:0}
-.d-blue{background:#3B82F6}.d-amber{background:#F59E0B}.d-purple{background:#8B5CF6}.d-teal{background:#14B8A6}.d-pink{background:#EC4899}
+  /* task add */
+  .task-add-row{display:flex;gap:6px;margin-bottom:8px}
+  .task-add-row input[type=time]{width:100px;flex-shrink:0}
+  .task-add-row input[type=text]{flex:1}
+  .add-bottom{display:flex;gap:6px}
+  .add-bottom select{flex:1}
 
-/* ── ACTION BUTTONS ── */
-.ab{
-  border:1.5px solid var(--border);border-radius:var(--r-xs);
-  padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer;
-  color:var(--text2);font-family:'Sarabun',sans-serif;transition:all .12s;
-  min-height:32px;display:inline-flex;align-items:center;justify-content:center;
-  background:var(--surface)
-}
-.ab:hover{border-color:var(--brand);color:var(--brand)}
-.ab:active{transform:scale(.96)}
-.ab.borrow-btn{border-color:#93C5FD;color:var(--info-txt);background:var(--info-bg)}
-.ab.borrow-btn:hover{background:#BFDBFE;border-color:#60A5FA}
-.ab.return-btn{border-color:#86EFAC;color:var(--ok-txt);background:var(--ok-bg)}
-.ab.return-btn:hover{background:#BBF7D0;border-color:#4ADE80}
-.ab-col{display:flex;flex-direction:column;gap:4px;align-items:stretch}
+  /* task list */
+  .task-list{display:flex;flex-direction:column;gap:7px;margin-top:.75rem}
+  .task-item{display:flex;align-items:center;gap:10px;padding:.7rem .8rem;border-radius:var(--radius-sm);background:#fafaf9;border:1.5px solid var(--border);transition:.15s}
+  .task-item:active{background:var(--p1)}
+  .task-item.t-high{border-left:4px solid #F4C0D1}
+  .task-item.t-normal{border-left:4px solid var(--p2)}
+  .task-item.t-done{border-left:4px solid var(--m2);opacity:.55}
+  .t-time{font-size:11px;font-weight:600;color:var(--text2);font-family:monospace;min-width:38px}
+  .t-text{flex:1;font-size:14px;color:var(--text);line-height:1.4}
+  .t-del{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:2px 4px;border-radius:6px;line-height:1}
+  .t-del:active{background:var(--r1);color:var(--rt)}
 
-/* ── PAGINATION ── */
-.pag{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:10px 16px;border-top:1px solid var(--border2);background:var(--surface);
-  flex-wrap:wrap;gap:8px
-}
-.pag-info{font-size:12px;color:var(--text2)}
-.pb-wrap{display:flex;gap:5px;flex-wrap:wrap}
-.pb{
-  height:30px;min-width:30px;padding:0 8px;
-  border:1px solid var(--border);border-radius:var(--r-xs);
-  background:none;cursor:pointer;font-size:12px;color:var(--text2);
-  font-family:'Sarabun',sans-serif;transition:all .12s;display:inline-flex;
-  align-items:center;justify-content:center
-}
-.pb:hover{border-color:var(--brand);color:var(--brand)}
-.pb.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .badge{display:inline-flex;align-items:center;font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;margin-left:4px;vertical-align:middle}
+  .badge-high{background:var(--r1);color:var(--rt)}
+  .badge-done{background:var(--m1);color:var(--mt)}
 
-.empty-state{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:13px}
-.loading-state{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:13px}
+  .empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:13px}
+  .empty-icon{font-size:36px;display:block;margin-bottom:8px}
 
-/* ── TOOLTIP (desktop only) ── */
-.tip{
-  display:none;position:fixed;z-index:1000;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:14px;width:220px;
-  box-shadow:var(--shadow-lg);pointer-events:none
-}
-.tip.show{display:block}
-@media(max-width:767px){.tip{display:none!important}}
-.tip-img{
-  width:100%;height:130px;background:var(--bg);
-  border-radius:var(--r-sm);display:flex;align-items:center;
-  justify-content:center;overflow:hidden;margin-bottom:10px
-}
-.tip-img img{
-  width:100%;height:100%;
-  object-fit:cover;
-  border-radius:var(--r-sm);
-  image-rendering:auto;
-  -webkit-font-smoothing:antialiased
-}
-.tip-name{font-size:13px;font-weight:600;margin-bottom:2px}
-.tip-code{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono',monospace;margin-bottom:8px}
-.tip-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:4px 0;border-top:1px solid var(--border2)}
-.tip-row span:first-child{color:var(--text2)}
-.tip-admin-btn{
-  width:100%;margin-top:10px;padding:7px 0;
-  border:1px solid #C4B5FD;border-radius:var(--r-xs);
-  background:var(--admin-bg);color:var(--admin-txt);
-  font-size:12px;font-weight:500;font-family:'Sarabun',sans-serif;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  gap:5px;pointer-events:all;transition:background .12s
-}
-.tip-admin-btn:hover{background:#DDD6FE}
-.tip-admin-btn svg{width:12px;height:12px}
+  /* auto row */
+  .auto-row{background:var(--a1);border-radius:var(--radius-sm);padding:.7rem .9rem;display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+  .auto-label{font-size:13px;color:var(--at);font-weight:500;flex:1}
+  input.auto-time{border:1.5px solid var(--a2);background:#fff;color:var(--at);width:90px;padding:6px 8px}
+  .toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+  .toggle input{opacity:0;width:0;height:0}
+  .slider{position:absolute;inset:0;background:#ddd;border-radius:20px;cursor:pointer;transition:.2s}
+  .slider:before{content:'';position:absolute;height:16px;width:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  input:checked+.slider{background:var(--pt)}
+  input:checked+.slider:before{transform:translateX(18px)}
 
-/* ── MODALS ── */
-.overlay{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.45);z-index:500;
-  align-items:flex-end;justify-content:center;
-  padding:0;overflow:hidden
-}
-@media(min-width:600px){
-  .overlay{align-items:flex-start;padding:40px 16px;overflow-y:auto}
-}
-.overlay.open{display:flex}
-.modal{
-  background:var(--surface);border-radius:var(--r) var(--r) 0 0;
-  border:1px solid var(--border);padding:20px 16px;
-  width:100%;max-width:100%;
-  max-height:90dvh;overflow-y:auto;
-  box-shadow:0 -8px 32px rgba(0,0,0,.12);
-  animation:slideUp .2s ease
-}
-@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
-@media(min-width:600px){
-  .modal{border-radius:var(--r);padding:24px;width:360px;max-height:none;box-shadow:var(--shadow-lg);animation:fadeIn .15s ease}
-  @keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
-}
-.modal-wide{width:100%}
-@media(min-width:600px){.modal-wide{width:540px}}
-.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;display:block}
-@media(min-width:600px){.modal-handle{display:none}}
-.modal h3{font-size:16px;font-weight:600;margin-bottom:14px;color:var(--text)}
-.field{margin-bottom:12px}
-.field label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;font-weight:500}
-.field input,.field select,.field textarea{
-  width:100%;font-family:'Sarabun',sans-serif;font-size:14px;
-  padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
-  background:var(--surface);color:var(--text);transition:border-color .15s;
-  min-height:42px
-}
-.field input:focus,.field select:focus{outline:none;border-color:var(--brand)}
-.info-box{background:var(--info-bg);border-radius:var(--r-sm);padding:10px 12px;font-size:13px;color:var(--info-txt);margin-bottom:12px;line-height:1.5}
-.mbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
-.btn-cancel{
-  height:40px;padding:0 16px;border:1.5px solid var(--border);
-  border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;
-  cursor:pointer;background:none;color:var(--text2);transition:all .12s;min-height:40px
-}
-.btn-cancel:hover{border-color:var(--text2)}
-.btn-ok{
-  height:40px;padding:0 16px;background:var(--brand);color:#fff;
-  border:none;border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;
-  font-size:14px;font-weight:600;cursor:pointer;transition:background .15s;min-height:40px
-}
-.btn-ok:hover{background:var(--brand-d)}
-.btn-ok:active{transform:scale(.97)}
-.btn-del{
-  height:40px;padding:0 16px;background:none;
-  border:1.5px solid var(--danger-txt);color:var(--danger-txt);
-  border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;cursor:pointer
-}
-.err{font-size:12px;color:var(--danger-txt);margin-top:6px;display:none;font-weight:500}
+  /* pill log */
+  .log{min-height:20px;margin-top:6px}
+  .pill{display:inline-flex;align-items:center;font-size:12px;font-weight:500;padding:3px 10px;border-radius:20px}
+  .pill-ok{background:var(--m1);color:var(--mt)}
+  .pill-warn{background:var(--a1);color:var(--at)}
+  .pill-err{background:var(--r1);color:var(--rt)}
+  .pill-info{background:var(--p1);color:var(--pt)}
 
-/* ── IMAGE UPLOAD ── */
-.upload-area{
-  border:2px dashed var(--border);border-radius:var(--r-sm);
-  padding:18px;text-align:center;cursor:pointer;background:var(--bg);
-  transition:border-color .15s,background .15s
-}
-.upload-area:hover{border-color:var(--brand);background:var(--brand-light)}
-.upload-area input{display:none}
-.upload-area p{font-size:12px;color:var(--text3);margin-top:6px}
-#img-preview{
-  width:100%;max-height:140px;object-fit:contain;
-  border-radius:var(--r-sm);margin-top:10px;display:none;
-  image-rendering:auto;
-  /* Sharp rendering on high-DPI screens */
-  -webkit-backface-visibility:hidden;
-  backface-visibility:hidden;
-  transform:translateZ(0)
-}
-.img-current-preview{
-  width:100%;height:110px;object-fit:cover;border-radius:var(--r-sm);
-  margin-bottom:10px;display:block;
-  image-rendering:auto;
-  transform:translateZ(0);
-  -webkit-backface-visibility:hidden
-}
+  /* preview */
+  .preview-box{background:var(--p1);border:1.5px solid var(--p2);border-radius:var(--radius-sm);padding:.8rem 1rem;margin-top:.75rem;display:none}
+  .preview-text{font-size:13px;line-height:1.8;color:var(--pt);white-space:pre-wrap}
 
-/* ── HISTORY ── */
-.hist-row{
-  display:flex;justify-content:space-between;align-items:flex-start;
-  padding:8px 0;border-top:1px solid var(--border2);font-size:12px
-}
-.hist-row:first-child{border-top:none}
-.hist-act{font-weight:600;font-size:12px}
-.hist-act.borrow{color:var(--warn-txt)}.hist-act.return{color:var(--ok-txt)}.hist-act.repair{color:var(--danger-txt)}
+  /* install banner */
+  .install-banner{background:linear-gradient(135deg,var(--p1),#fff);border:1.5px solid var(--p2);border-radius:var(--radius);padding:1rem 1.1rem;margin-bottom:.875rem;display:none}
+  .install-banner.show{display:block}
+  .install-title{font-size:14px;font-weight:600;color:var(--pt);margin-bottom:4px}
+  .install-sub{font-size:12px;color:var(--text2);margin-bottom:.75rem;line-height:1.5}
 
-/* ── MANUAL ── */
-.manual-step{display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--border2)}
-.manual-step:first-child{border-top:none;padding-top:0}
-.step-num{width:30px;height:30px;min-width:30px;border-radius:50%;background:var(--brand);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.step-body h4{font-size:13px;font-weight:600;margin-bottom:3px;color:var(--text)}
-.step-body p{font-size:12.5px;color:var(--text2);line-height:1.6}
-.chip{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;margin:2px 2px 0 0;font-weight:600}
-.m-sec{margin-top:16px;padding-top:16px;border-top:1px solid var(--border2)}
-.m-sec-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
-.role-card{background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:8px;border:1px solid var(--border2)}
-.role-card h5{font-size:13px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:7px}
-.role-card ul{list-style:none;padding:0}
-.role-card li{font-size:12.5px;color:var(--text2);padding:2px 0;display:flex;align-items:flex-start;gap:7px}
-.role-card li::before{content:"";width:4px;height:4px;border-radius:50%;background:var(--brand);margin-top:7px;flex-shrink:0}
-.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
-.s-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2)}
-.tips-box{background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;border:1px solid var(--border2)}
-.tip-item{font-size:12.5px;color:var(--text2);padding:3px 0;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
-.tip-item .arrow{color:var(--brand);font-weight:700;flex-shrink:0}
-.tip-item .warn-arrow{color:var(--warn-txt);font-weight:700;flex-shrink:0}
+  /* ios guide */
+  .ios-guide{background:var(--p1);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--pt);line-height:1.8}
 
-/* ── ACTIVITY LOG ── */
-.activity-section{margin-top:12px}
-.activity-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden
-}
-.activity-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;border-bottom:1px solid var(--border2);
-  background:var(--bg);cursor:pointer;user-select:none
-}
-.activity-header-left{display:flex;align-items:center;gap:8px}
-.activity-title{font-size:13px;font-weight:600;color:var(--text)}
-.activity-live-badge{
-  display:inline-flex;align-items:center;gap:4px;
-  background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;
-  border-radius:20px;font-size:10px;font-weight:600;padding:2px 8px
-}
-.activity-live-dot{width:5px;height:5px;border-radius:50%;background:#F59E0B;animation:pulse 1.5s infinite}
-.activity-count{
-  background:var(--brand-light);color:var(--brand);
-  border-radius:20px;font-size:11px;font-weight:700;
-  padding:1px 8px;min-width:22px;text-align:center
-}
-.activity-toggle{color:var(--text3);font-size:11px;display:flex;align-items:center;gap:4px}
-.activity-toggle svg{transition:transform .2s}
-.activity-body{max-height:340px;overflow-y:auto}
-.activity-body.hidden{display:none}
-.act-row{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:10px 16px;border-bottom:1px solid var(--border2);
-  transition:background .1s;animation:fadeInRow .3s ease
-}
-@keyframes fadeInRow{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.act-row:last-child{border-bottom:none}
-.act-row:hover{background:var(--bg)}
-.act-icon{
-  width:30px;height:30px;min-width:30px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;flex-shrink:0;margin-top:1px
-}
-.act-icon.borrow{background:var(--warn-bg)}
-.act-icon.return{background:var(--ok-bg)}
-.act-icon.repair{background:var(--danger-bg)}
-.act-icon.add{background:var(--admin-bg)}
-.act-icon.edit{background:var(--info-bg)}
-.act-icon.delete{background:#FCE7F3}
-.act-body{flex:1;min-width:0}
-.act-main{font-size:13px;color:var(--text);line-height:1.5}
-.act-main b{font-weight:600}
-.act-sub{font-size:11px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.act-time{font-size:10.5px;color:var(--text3);white-space:nowrap;flex-shrink:0;margin-top:3px;text-align:right;min-width:90px}
-.act-new-dot{width:6px;height:6px;border-radius:50%;background:var(--brand-mid);flex-shrink:0;margin-top:6px;box-shadow:0 0 0 3px var(--brand-light);align-self:center;margin-top:0}
-.activity-empty{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
-
-/* ── TOOL STATUS WARNING ── */
-.tool-status-box{
-  border-radius:var(--r-sm);padding:10px 12px;font-size:13px;
-  margin-top:8px;display:none;line-height:1.6;
-  border:1.5px solid;animation:fadeInRow .2s ease
-}
-.tool-status-box.in-use{
-  background:var(--warn-bg);color:var(--warn-txt);
-  border-color:#FCD34D
-}
-.tool-status-box.maintenance{
-  background:var(--danger-bg);color:var(--danger-txt);
-  border-color:#FCA5A5
-}
-.tool-status-box.available{
-  background:var(--ok-bg);color:var(--ok-txt);
-  border-color:#86EFAC
-}
-.tool-status-box-icon{font-size:16px;margin-right:4px}
-
-
-/* ── FIREBASE SETUP SCREEN ── */
-#fb-setup-screen{
-  position:fixed;inset:0;background:var(--bg);z-index:9999;
-  display:flex;align-items:center;justify-content:center;padding:20px
-}
-.fb-setup-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);padding:28px 24px;width:100%;max-width:480px;
-  box-shadow:var(--shadow-lg)
-}
-.fb-setup-card h2{font-size:18px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.fb-setup-card p{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px}
-.fb-setup-steps{background:var(--bg);border-radius:var(--r-sm);padding:14px 16px;margin-bottom:16px;font-size:13px;line-height:1.8;color:var(--text2);border:1px solid var(--border2)}
-.fb-setup-steps b{color:var(--text)}
-.fb-setup-steps a{color:var(--brand);text-decoration:none;font-weight:500}
-.fb-setup-steps a:hover{text-decoration:underline}
-.fb-setup-card .field{margin-bottom:10px}
-.fb-setup-card label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:4px}
-.fb-setup-card input{
-  width:100%;font-family:'IBM Plex Mono',monospace;font-size:12px;
-  padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r-sm);
-  background:var(--bg);color:var(--text)
-}
-.fb-setup-card input:focus{outline:none;border-color:var(--brand)}
-#fb-connect-err{font-size:12px;color:var(--danger-txt);margin-bottom:10px;display:none;font-weight:500;background:var(--danger-bg);padding:8px 12px;border-radius:var(--r-xs)}
-/* ── CONNECTION STATUS ── */
-.conn-badge{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;font-weight:600;padding:3px 10px;
-  border-radius:20px;transition:all .3s
-}
-.conn-badge.online{background:#DCFCE7;color:#166534;border:1px solid #86EFAC}
-.conn-badge.offline{background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5}
-.conn-badge.connecting{background:#FEF3E2;color:#92400E;border:1px solid #FCD34D}
-.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.5s infinite}
-/* ── REALTIME FLASH ── */
-@keyframes flashRow{0%{background:#E0F5ED}100%{background:transparent}}
-.rt-flash{animation:flashRow .8s ease}
-
-.mobile-fab{
-  display:flex;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);
-  background:var(--brand);color:#fff;border:none;border-radius:30px;
-  padding:12px 24px;font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;
-  cursor:pointer;box-shadow:0 4px 20px rgba(15,122,90,.4);gap:8px;align-items:center;
-  z-index:100;transition:all .2s;white-space:nowrap
-}
-.mobile-fab:active{transform:translateX(-50%) scale(.95)}
-@media(min-width:768px){.mobile-fab{display:none}}
-
-/* ── DETAIL MODAL (mobile) ── */
-.detail-img{
-  width:100%;height:200px;object-fit:cover;
-  border-radius:var(--r-sm);margin-bottom:14px;
-  image-rendering:auto;
-  transform:translateZ(0);
-  -webkit-backface-visibility:hidden;
-  display:block
-}
-.detail-img-placeholder{
-  width:100%;height:160px;background:var(--bg);border-radius:var(--r-sm);
-  display:flex;align-items:center;justify-content:center;margin-bottom:14px;
-  flex-direction:column;gap:8px;color:var(--text3);font-size:12px
-}
-.detail-row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border2);font-size:13px}
-.detail-row:first-child{border-top:none}
-.detail-row span:first-child{color:var(--text2);font-weight:500}
+  /* summary stat */
+  .stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.875rem}
+  .stat{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem;text-align:center}
+  .stat-num{font-size:24px;font-weight:700;color:var(--pt)}
+  .stat-label{font-size:11px;color:var(--text2);margin-top:2px}
 </style>
 </head>
 <body>
-<div class="app">
 
-<!-- TOP BAR -->
-<div class="top-bar">
-  <div class="top-left">
-    <span class="live-dot"></span>
-    <span class="app-title">ระบบยืม-คืนเครื่องมือ</span>
-  </div>
-  <div class="top-right">
-    <span class="clock" id="clk"></span>
-    <span class="conn-badge connecting" id="conn-badge"><span class="conn-dot"></span><span id="conn-txt">กำลังเชื่อมต่อ...</span></span>
-    <button class="pill-btn pill-manual" onclick="openOv('ov-manual')">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 5h6M5 8h6M5 11h4"/></svg>
-      <span class="hide-xs">คู่มือ</span>
-    </button>
-    <button class="pill-btn" id="pwa-install-btn" onclick="handleInstallClick()" style="display:none;background:#E0F5ED;color:#0F7A5A;border-color:#27C18A">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 2v8M5 7l3 3 3-3"/><path d="M2 11v1a2 2 0 002 2h8a2 2 0 002-2v-1"/></svg>
-      <span>ติดตั้ง</span>
-    </button>
-    <button class="pill-btn pill-admin-off" id="admin-btn" onclick="toggleAdmin()">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 015 0v2"/></svg>
-      <span id="admin-lbl">Admin</span>
-    </button>
-  </div>
-</div>
-
-<!-- METRICS -->
-<div class="metrics">
-  <div class="metric"><div class="metric-label">ทั้งหมด</div><div class="metric-val" id="m-all">-</div></div>
-  <div class="metric"><div class="metric-label">กำลังใช้</div><div class="metric-val" id="m-use" style="color:var(--warn-txt)">-</div></div>
-  <div class="metric"><div class="metric-label">ว่าง</div><div class="metric-val" id="m-avail" style="color:var(--ok-txt)">-</div></div>
-  <div class="metric"><div class="metric-label">ซ่อมบำรุง</div><div class="metric-val" id="m-maint" style="color:var(--danger-txt)">-</div></div>
-</div>
-
-<!-- CONTROLS -->
-<div class="ctrl-bar">
-  <input type="text" id="srch" placeholder="🔍 ค้นหาชื่อ / รหัส / ผู้ใช้..." oninput="render()">
-  <select id="flt-s" onchange="render()">
-    <option value="">ทุกสถานะ</option>
-    <option value="available">ว่าง</option>
-    <option value="in-use">กำลังใช้งาน</option>
-    <option value="maintenance">ซ่อมบำรุง</option>
-    <option value="returned">คืนแล้ว</option>
-  </select>
-  <button class="btn-green" onclick="openBorrow()" id="main-borrow-btn">+ ยืมเครื่องมือ</button>
-  <button class="btn-gray" id="admin-add-btn" onclick="openAdd()">+ เพิ่มเครื่องมือ</button>
-  <button class="btn-gray" id="fb-reset-btn" onclick="resetFirebaseConfig()" style="display:none;background:#4B5563">🔥 เปลี่ยน DB</button>
-</div>
-
-<!-- TABLE CARD -->
-<div class="tbl-card">
-  <div id="loading-state" class="loading-state">กำลังโหลดข้อมูล...</div>
-
-  <!-- DESKTOP TABLE -->
-  <div id="tbl-inner" class="desktop-view" style="display:none">
-    <table>
-      <colgroup><col><col><col><col><col><col><col><col></colgroup>
-      <thead><tr>
-        <th>ชื่อเครื่องมือ</th><th>รหัส</th><th>ผู้ใช้</th><th>สถานที่</th>
-        <th>วันที่ยืม</th><th>กำหนดคืน</th><th>สถานะ</th><th>การดำเนินการ</th>
-      </tr></thead>
-      <tbody id="tbody"></tbody>
-    </table>
-    <div id="empty-state" class="empty-state" style="display:none">ไม่พบข้อมูลที่ตรงกัน</div>
-  </div>
-
-  <!-- MOBILE CARD LIST -->
-  <div id="mobile-list" class="mobile-view" style="display:none">
-    <div id="mobile-cards"></div>
-    <div id="empty-state-m" class="empty-state" style="display:none">ไม่พบข้อมูลที่ตรงกัน</div>
-  </div>
-
-  <div class="pag" id="pag" style="display:none">
-    <span class="pag-info" id="pag-info"></span>
-    <div class="pb-wrap" id="pag-btns"></div>
-  </div>
-</div>
-
-<!-- ACTIVITY LOG -->
-<div class="activity-section">
-  <div class="activity-card">
-    <div class="activity-header" onclick="toggleActivityLog()">
-      <div class="activity-header-left">
-        <span class="activity-title">📋 บันทึกกิจกรรมล่าสุด</span>
-        <span class="activity-live-badge"><span class="activity-live-dot"></span>LIVE</span>
-        <span class="activity-count" id="act-count">0</span>
-      </div>
-      <div class="activity-toggle" id="act-toggle">
-        <span id="act-toggle-txt">ซ่อน</span>
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>
-      </div>
+<div class="header">
+  <div class="header-inner">
+    <div class="header-icon">🔔</div>
+    <div>
+      <div class="header-title">Daily Task Reminder</div>
+      <div class="header-sub">แจ้งเตือนงานรายวันผ่าน Telegram</div>
     </div>
-    <div class="activity-body" id="act-body">
-      <div class="activity-empty" id="act-empty" style="display:none">ยังไม่มีกิจกรรม</div>
-      <div id="act-list"></div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="showPage('tasks')">📋 งาน</div>
+    <div class="tab" onclick="showPage('notify')">🔔 แจ้งเตือน</div>
+    <div class="tab" onclick="showPage('settings')">⚙️ ตั้งค่า</div>
+  </div>
+</div>
+
+<!-- TASKS PAGE -->
+<div class="page active" id="page-tasks">
+  <div id="install-banner" class="install-banner">
+    <div class="install-title">📲 ติดตั้งเป็นแอปได้เลย!</div>
+    <div class="install-sub" id="install-sub"></div>
+    <button class="btn btn-primary" id="install-btn" onclick="installApp()" style="display:none">ติดตั้งแอป</button>
+    <div class="ios-guide" id="ios-guide" style="display:none">
+      กด <strong>แชร์</strong> (ปุ่ม ⬆️ ด้านล่าง) → เลือก <strong>"เพิ่มไปยังหน้าจอหลัก"</strong>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num" id="stat-today">0</div><div class="stat-label">งานวันนี้</div></div>
+    <div class="stat"><div class="stat-num" id="stat-done">0</div><div class="stat-label">เสร็จแล้ว</div></div>
+  </div>
+
+  <div class="card">
+    <div class="date-nav">
+      <button onclick="changeDay(-1)" aria-label="วันก่อน">‹</button>
+      <span class="date-label" id="date-label"></span>
+      <button onclick="changeDay(1)" aria-label="วันถัดไป">›</button>
+    </div>
+    <div class="card-title">➕ เพิ่มงานใหม่</div>
+    <div class="task-add-row">
+      <input type="time" id="task-time" value="09:00">
+      <input type="text" id="task-text" placeholder="ชื่องาน / รายละเอียด..." onkeydown="if(event.key==='Enter')addTask()">
+    </div>
+    <div class="add-bottom">
+      <select id="task-priority">
+        <option value="normal">🔵 ปกติ</option>
+        <option value="high">🔴 ด่วน</option>
+        <option value="done">✅ เสร็จแล้ว</option>
+      </select>
+      <button class="btn btn-primary" onclick="addTask()">+ เพิ่ม</button>
+    </div>
+    <div class="task-list" id="task-list">
+      <div class="empty-state"><span class="empty-icon">📋</span>ยังไม่มีงานในวันนี้<br>กดเพิ่มงานด้านบนได้เลย</div>
     </div>
   </div>
 </div>
 
+<!-- NOTIFY PAGE -->
+<div class="page" id="page-notify">
+  <div class="card">
+    <div class="card-title">🕐 แจ้งเตือนอัตโนมัติ</div>
+    <div class="auto-row">
+      <span class="auto-label">⏰ ส่งแจ้งเตือนทุกวันเวลา</span>
+      <input type="time" class="auto-time" id="auto-time" value="08:00">
+      <label class="toggle" aria-label="เปิด/ปิด"><input type="checkbox" id="auto-toggle" onchange="toggleAuto()"><span class="slider"></span></label>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">⚠️ ต้องเปิดหน้าเว็บ/แอปค้างไว้ เพื่อให้ระบบส่งได้ตามเวลา</p>
+    <div class="btn-row">
+      <button class="btn btn-tg" id="send-btn" onclick="sendNow()">✈️ ส่งแจ้งเตือนตอนนี้</button>
+      <button class="btn btn-ghost" onclick="previewMsg()">👁 ดูตัวอย่าง</button>
+    </div>
+    <div class="log" id="send-log"></div>
+    <div class="preview-box" id="preview-box">
+      <div style="font-size:11px;font-weight:600;color:var(--p3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">ตัวอย่างข้อความ</div>
+      <pre class="preview-text" id="preview-text"></pre>
+    </div>
+  </div>
 
-</div><!-- .app -->
-
-<!-- MOBILE FAB -->
-<button class="mobile-fab" onclick="openBorrow()">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-  ยืมเครื่องมือ
-</button>
-
-<!-- TOOLTIP (desktop) -->
-<div id="tip" class="tip"></div>
-
-<!-- MANUAL MODAL -->
-<div class="overlay" id="ov-manual" onclick="if(event.target===this)closeOv('ov-manual')">
-  <div class="modal modal-wide" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3>📋 คู่มือการใช้งานระบบ</h3>
-    <div class="m-sec" style="margin-top:0;padding-top:0;border-top:none">
-      <div class="m-sec-title">ขั้นตอนการยืมเครื่องมือ</div>
-      <div class="manual-step"><div class="step-num">1</div><div class="step-body"><h4>ตรวจสอบสถานะ</h4><p>หาเครื่องมือที่มีสถานะ <span class="chip badge available">ว่าง</span> เอาเมาส์วางที่ชื่อเพื่อดูรูปและรายละเอียด (บนคอมพิวเตอร์) หรือกดชื่อเครื่องมือบนมือถือ</p></div></div>
-      <div class="manual-step"><div class="step-num">2</div><div class="step-body"><h4>กดปุ่มยืม</h4><p>กดปุ่ม <span class="chip" style="background:var(--info-bg);color:var(--info-txt)">ยืม</span> ที่แถวเครื่องมือ หรือกดปุ่ม <span class="chip" style="background:var(--brand);color:#fff">+ ยืมเครื่องมือ</span> แล้วเลือกรายการ</p></div></div>
-      <div class="manual-step"><div class="step-num">3</div><div class="step-body"><h4>กรอกข้อมูล</h4><p>กรอก ชื่อ-นามสกุล, แผนก, สถานที่ใช้งาน, วันที่ยืม, กำหนดคืน และวัตถุประสงค์</p></div></div>
-      <div class="manual-step"><div class="step-num">4</div><div class="step-body"><h4>ยืนยัน</h4><p>กด "ยืนยันยืม" สถานะจะเปลี่ยนเป็น <span class="chip badge in-use">กำลังใช้งาน</span> ทันที</p></div></div>
-    </div>
-    <div class="m-sec">
-      <div class="m-sec-title">ขั้นตอนการคืนเครื่องมือ</div>
-      <div class="manual-step"><div class="step-num">1</div><div class="step-body"><h4>หาเครื่องมือ</h4><p>ค้นหาชื่อหรือรหัส แล้วกดปุ่ม <span class="chip" style="background:var(--ok-bg);color:var(--ok-txt)">คืน</span></p></div></div>
-      <div class="manual-step"><div class="step-num">2</div><div class="step-body"><h4>กรอกข้อมูลคืน</h4><p>กรอกชื่อผู้คืน เลือกสภาพเครื่องมือ และหมายเหตุ (ถ้ามี)</p></div></div>
-      <div class="manual-step"><div class="step-num">3</div><div class="step-body"><h4>ยืนยัน</h4><p>ปกติ → <span class="chip badge available">ว่าง</span> &nbsp;|&nbsp; ชำรุด → <span class="chip badge maintenance">ซ่อมบำรุง</span></p></div></div>
-    </div>
-    <div class="m-sec">
-      <div class="m-sec-title">สิทธิ์การใช้งาน</div>
-      <div class="role-card"><h5><span style="width:22px;height:22px;border-radius:50%;background:var(--ok-bg);color:var(--ok-txt);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">✓</span>พนักงานทั่วไป (ไม่ต้อง Login)</h5><ul><li>ดูสถานะเครื่องมือทั้งหมด</li><li>ยืมเครื่องมือที่ว่าง</li><li>คืนเครื่องมือ</li><li>ดูประวัติการยืม-คืน</li></ul></div>
-      <div class="role-card"><h5><span style="width:22px;height:22px;border-radius:50%;background:var(--admin-bg);color:var(--admin-txt);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">A</span>Admin (ต้องใส่รหัสผ่าน)</h5><ul><li>เพิ่ม / แก้ไข / ลบเครื่องมือ</li><li>อัปโหลดรูปภาพ (เฉพาะ Admin)</li><li>จัดการสถานะทุกประเภท</li></ul></div>
-    </div>
-    <div class="m-sec">
-      <div class="m-sec-title">ความหมายสถานะ</div>
-      <div class="status-grid">
-        <div class="s-item"><span class="badge available">ว่าง</span><span>พร้อมยืม</span></div>
-        <div class="s-item"><span class="badge in-use">กำลังใช้</span><span>มีผู้ยืม</span></div>
-        <div class="s-item"><span class="badge maintenance">ซ่อมบำรุง</span><span>ระหว่างซ่อม</span></div>
-        <div class="s-item"><span class="badge returned">คืนแล้ว</span><span>เพิ่งคืน</span></div>
-      </div>
-    </div>
-    <div class="m-sec">
-      <div class="m-sec-title">เคล็ดลับ</div>
-      <div class="tips-box">
-        <div class="tip-item"><span class="arrow">→</span><span><b>คอมพิวเตอร์:</b> วางเมาส์ที่ชื่อเครื่องมือเพื่อดูรูปภาพคมชัด</span></div>
-        <div class="tip-item"><span class="arrow">→</span><span><b>มือถือ:</b> กดที่ชื่อเครื่องมือเพื่อดูรายละเอียดและรูปภาพ</span></div>
-        <div class="tip-item"><span class="arrow">→</span><span>จุดเขียวข้างชื่อ = มีรูปภาพแล้ว</span></div>
-        <div class="tip-item"><span class="warn-arrow">⚠</span><span>สีแดง + ⚠ = เกินกำหนดคืน</span></div>
-      </div>
-    </div>
-    <div class="mbtns"><button class="btn-ok" onclick="closeOv('ov-manual')">เข้าใจแล้ว</button></div>
+  <div class="card">
+    <div class="card-title">📅 สรุปงานสัปดาห์นี้</div>
+    <div id="week-summary" style="font-size:13px;color:var(--text2);line-height:2"></div>
   </div>
 </div>
 
-<!-- BORROW MODAL -->
-<div class="overlay" id="ov-borrow" onclick="if(event.target===this)closeOv('ov-borrow')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3>ยืมเครื่องมือ</h3>
-    <div class="info-box">กรอกข้อมูลด้วยตัวเองว่าเอาอะไรไป ใช้ที่ไหน วันไหน</div>
-    <div class="field"><label>ชื่อผู้ยืม *</label><input id="b-user" placeholder="ชื่อ-นามสกุล"></div>
-    <div class="field"><label>แผนก</label><input id="b-dept" placeholder="เช่น แผนกผลิต, ฝ่ายซ่อมบำรุง"></div>
-    <div class="field"><label>เลือกเครื่องมือ *</label><select id="b-tool" onchange="checkToolStatus(this.value)"><option value="">-- เลือกเครื่องมือที่ว่าง --</option></select>
-      <div id="tool-status-box" class="tool-status-box"></div></div>
-    <div class="field"><label>สถานที่ใช้งาน *</label><input id="b-loc" placeholder="เช่น โรงงาน A ห้อง 3"></div>
-    <div class="field"><label>วันที่ยืม</label><input id="b-from" type="date"></div>
-    <div class="field"><label>กำหนดคืน</label><input id="b-due" type="date"></div>
-    <div class="field"><label>วัตถุประสงค์</label><input id="b-note" placeholder="งาน / วัตถุประสงค์การใช้งาน"></div>
-    <div class="err" id="b-err">กรุณากรอกข้อมูลให้ครบ (ชื่อ, เครื่องมือ, สถานที่)</div>
-    <div class="mbtns"><button class="btn-cancel" onclick="closeOv('ov-borrow')">ยกเลิก</button><button class="btn-ok" id="borrow-confirm-btn" onclick="saveBorrow()">ยืนยันยืม</button></div>
-  </div>
-</div>
-
-<!-- RETURN MODAL -->
-<div class="overlay" id="ov-return" onclick="if(event.target===this)closeOv('ov-return')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3>คืนเครื่องมือ</h3>
-    <div id="ret-info" style="background:var(--bg);border-radius:var(--r-sm);border:1px solid var(--border2);padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--text);line-height:1.6"></div>
-    <div class="field"><label>ชื่อผู้คืน *</label><input id="r-user" placeholder="ชื่อ-นามสกุล"></div>
-    <div class="field"><label>สภาพเครื่องมือ</label><select id="r-cond"><option value="ok">ปกติ / ใช้งานได้</option><option value="damaged">ชำรุด / ต้องซ่อม</option></select></div>
-    <div class="field"><label>หมายเหตุ</label><input id="r-note" placeholder="(ถ้ามี)"></div>
-    <div class="err" id="r-err">กรุณากรอกชื่อผู้คืน</div>
-    <div class="mbtns"><button class="btn-cancel" onclick="closeOv('ov-return')">ยกเลิก</button><button class="btn-ok" onclick="saveReturn()">ยืนยันคืน</button></div>
-  </div>
-</div>
-
-<!-- HISTORY MODAL -->
-<div class="overlay" id="ov-hist" onclick="if(event.target===this)closeOv('ov-hist')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3 id="hist-title">ประวัติการใช้งาน</h3>
-    <div id="hist-body"></div>
-    <div class="mbtns"><button class="btn-cancel" onclick="closeOv('ov-hist')">ปิด</button></div>
-  </div>
-</div>
-
-<!-- DETAIL MODAL (mobile tap) -->
-<div class="overlay" id="ov-detail" onclick="if(event.target===this)closeOv('ov-detail')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3 id="detail-title">รายละเอียดเครื่องมือ</h3>
-    <div id="detail-body"></div>
-    <div class="mbtns" id="detail-actions"></div>
-  </div>
-</div>
-
-<!-- ADD/EDIT MODAL -->
-<div class="overlay" id="ov-add" onclick="if(event.target===this)closeOv('ov-add')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3 id="add-title">เพิ่มเครื่องมือใหม่</h3>
-    <div class="field"><label>ชื่อเครื่องมือ *</label><input id="a-name" placeholder="เช่น เครื่องวัดความดัน"></div>
-    <div class="field"><label>รหัส *</label><input id="a-code" placeholder="เช่น TL-009"></div>
-    <div class="field"><label>หมวดหมู่</label><input id="a-cat" placeholder="เช่น เครื่องมือวัด, ไฟฟ้า"></div>
-    <div class="field"><label>สถานะ</label><select id="a-status"><option value="available">ว่าง / พร้อมใช้</option><option value="maintenance">ซ่อมบำรุง</option></select></div>
+<!-- SETTINGS PAGE -->
+<div class="page" id="page-settings">
+  <div class="card">
+    <div class="card-title">🤖 ตั้งค่า Telegram Bot</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><span>เปิด Telegram → หา <strong>@BotFather</strong> → พิมพ์ <code>/newbot</code> → ตั้งชื่อ → รับ <strong>Bot Token</strong></span></div>
+      <div class="step"><div class="step-num">2</div><span>เปิดแชทกับบอทที่สร้าง แล้วส่งข้อความอะไรก็ได้ 1 ครั้ง</span></div>
+      <div class="step"><div class="step-num">3</div><span>วาง Token แล้วกด <strong>"ดึง Chat ID"</strong></span></div>
+    </div>
     <div class="field">
-      <label>รูปภาพ (Admin เท่านั้น)</label>
-      <div id="img-current-wrap"></div>
-      <div class="upload-area" onclick="document.getElementById('a-img-inp').click()">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".3" style="margin:0 auto;display:block"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-        <p>คลิกเพื่อเลือกรูปภาพ (รองรับ JPG, PNG, WEBP)</p>
-        <input type="file" id="a-img-inp" accept="image/*" onchange="prevImg(event)">
-        <img id="img-preview">
-      </div>
-      <div id="img-clear-wrap" style="display:none;margin-top:8px">
-        <button class="btn-del" style="height:34px;font-size:12px;width:100%" onclick="clearImg()">ลบรูปภาพ</button>
+      <div class="field-label">Bot Token</div>
+      <div class="input-row">
+        <input type="password" id="bot-token" placeholder="123456789:ABCdef..." autocomplete="off">
+        <button class="btn btn-ghost" onclick="fetchChatId()">ดึง ID</button>
       </div>
     </div>
-    <div class="err" id="a-err">กรุณากรอกชื่อและรหัสเครื่องมือ</div>
-    <div class="mbtns">
-      <button class="btn-del" id="a-del-btn" onclick="deleteTool()" style="display:none">ลบ</button>
-      <button class="btn-cancel" onclick="closeOv('ov-add')">ยกเลิก</button>
-      <button class="btn-ok" onclick="saveTool()">บันทึก</button>
+    <div class="field">
+      <div class="field-label">Chat ID</div>
+      <div class="input-row">
+        <input type="text" id="chat-id" placeholder="จะถูกกรอกอัตโนมัติ..." style="font-family:monospace">
+        <button class="btn btn-primary" onclick="saveConfig()">บันทึก</button>
+      </div>
     </div>
+    <div class="log" id="config-log"></div>
   </div>
-</div>
 
-<!-- LOGIN MODAL -->
-<div class="overlay" id="ov-login" onclick="if(event.target===this)closeOv('ov-login')">
-  <div class="modal" style="max-width:320px" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3>🔐 เข้าสู่ระบบ Admin</h3>
-    <div class="field" style="margin-top:.5rem"><label>รหัสผ่าน</label><input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="err" id="l-err">รหัสผ่านไม่ถูกต้อง</div>
-    <div class="mbtns"><button class="btn-cancel" onclick="closeOv('ov-login')">ยกเลิก</button><button class="btn-ok" onclick="doLogin()">เข้าสู่ระบบ</button></div>
+  <div class="card">
+    <div class="card-title">🗑 จัดการข้อมูล</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">ข้อมูลงานทั้งหมดเก็บในเครื่องของคุณ ไม่ได้ส่งไปไหน</p>
+    <button class="btn btn-ghost" onclick="clearOldData()" style="font-size:13px">🧹 ลบข้อมูลเก่า (>30 วัน)</button>
+  </div>
+
+  <div class="card" id="install-card">
+    <div class="card-title">📲 ติดตั้งแอป</div>
+    <div id="install-card-content"></div>
   </div>
 </div>
 
 <script>
-const ADMIN_PASS='admin1234';
-const STATUS_TH={'available':'ว่าง','in-use':'กำลังใช้งาน','maintenance':'ซ่อมบำรุง','returned':'คืนแล้ว'};
-const LOC_DOTS=['d-blue','d-amber','d-purple','d-teal','d-pink'];
-const STORAGE_KEY='tool-tracker-v3'; // v3: fixed index bug
-const FB_CONFIG_KEY='tool-tracker-firebase-config';
+const DB='task_v3',CFG='tg_v2';
+let curDate=todayStr(),autoTimer=null,deferredPrompt=null;
 
-const SEED=[
-  {id:'TL-001',name:'เครื่องวัดความดัน',cat:'เครื่องมือวัด',status:'in-use',user:'สมชาย มีสุข',dept:'แผนกผลิต',loc:'โรงงาน A',from:'2026-04-25',due:'2026-05-05',note:'ตรวจสอบระบบท่อ',img:null,hist:[{act:'ยืม',user:'สมชาย มีสุข',dept:'แผนกผลิต',date:'2026-04-25',loc:'โรงงาน A',note:'ตรวจสอบระบบท่อ'}]},
-  {id:'TL-002',name:'มัลติมิเตอร์ Fluke',cat:'ไฟฟ้า',status:'available',user:null,dept:null,loc:null,from:null,due:null,note:null,img:null,hist:[]},
-  {id:'TL-003',name:'เครื่องเชื่อมไฟฟ้า',cat:'เชื่อม',status:'maintenance',user:null,dept:null,loc:null,from:null,due:null,note:'ส่งซ่อม',img:null,hist:[{act:'ซ่อมบำรุง',user:'ทีมซ่อมบำรุง',dept:'',date:'2026-04-20',loc:'—',note:'ส่งซ่อม'}]},
-  {id:'TL-004',name:'ไขควงทอร์ค',cat:'เครื่องมือมือ',status:'in-use',user:'อนุชา ดีงาม',dept:'แผนก QC',loc:'ห้อง QC 2',from:'2026-05-01',due:'2026-05-03',note:'ตรวจสอบการประกอบ',img:null,hist:[{act:'ยืม',user:'อนุชา ดีงาม',dept:'แผนก QC',date:'2026-05-01',loc:'ห้อง QC 2',note:'ตรวจสอบการประกอบ'}]},
-  {id:'TL-005',name:'ออสซิลโลสโคป',cat:'ไฟฟ้า',status:'available',user:null,dept:null,loc:null,from:null,due:null,note:null,img:null,hist:[]},
-  {id:'TL-006',name:'เครื่องตรวจโลหะ',cat:'ตรวจสอบ',status:'available',user:null,dept:null,loc:null,from:null,due:null,note:null,img:null,hist:[]},
-  {id:'TL-007',name:'ประแจปอนด์',cat:'เครื่องมือมือ',status:'returned',user:'สุรพล ทองดี',dept:'แผนกผลิต',loc:'—',from:'2026-04-30',due:'2026-05-04',note:'งานติดตั้ง',img:null,hist:[{act:'ยืม',user:'สุรพล ทองดี',dept:'แผนกผลิต',date:'2026-04-30',loc:'ภาคสนาม',note:'งานติดตั้ง'},{act:'คืน',user:'สุรพล ทองดี',dept:'',date:'2026-05-02',note:'สภาพ: ปกติ'}]},
-  {id:'TL-008',name:'เครื่องวัดอุณหภูมิ IR',cat:'เครื่องมือวัด',status:'available',user:null,dept:null,loc:null,from:null,due:null,note:null,img:null,hist:[]},
-];
+function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function pad(n){return String(n).padStart(2,'0')}
+function displayDate(s){
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const dt=new Date(s+'T00:00:00');
+  const[y,m,d]=s.split('-');
+  const today=todayStr();
+  const diff=Math.round((new Date(s)-new Date(today))/86400000);
+  let pre=diff===0?'วันนี้ · ':diff===1?'พรุ่งนี้ · ':diff===-1?'เมื่อวาน · ':'';
+  return pre+days[dt.getDay()]+' '+d+' '+months[parseInt(m)-1]+' '+(parseInt(y)+543);
+}
+function getData(){try{return JSON.parse(localStorage.getItem(DB)||'{}')}catch{return{}}}
+function saveData(d){localStorage.setItem(DB,JSON.stringify(d))}
+function getCfg(){try{return JSON.parse(localStorage.getItem(CFG)||'{}')}catch{return{}}}
+function setLog(id,msg,type){
+  const c={ok:'pill-ok',warn:'pill-warn',err:'pill-err',info:'pill-info'};
+  document.getElementById(id).innerHTML='<span class="pill '+(c[type||'ok'])+'">'+msg+'</span>';
+  setTimeout(()=>{const e=document.getElementById(id);if(e)e.innerHTML=''},5000);
+}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
 
-let tools=[],isAdmin=false,pg=1,editIdx=null,editId=null,retIdx=null,pendImg=null,tipKeep=false,tipTO=null;
-const PER=8;
-
-// ── FIREBASE STATE ──
-let fbApp=null, fbDb=null, fbRef=null, fbActRef=null, fbPrefix='', useFirebase=false;
-
-// ── FIREBASE SETUP ──
-function connectFirebase(){
-  const url=(document.getElementById('fb-url-inp').value||'').trim().replace(/\/+$/,'');
-  const prefix=(document.getElementById('fb-prefix-inp').value||'').trim().replace(/[^a-zA-Z0-9_-]/g,'');
-  const errEl=document.getElementById('fb-connect-err');
-  errEl.style.display='none';
-  if(!url||!url.startsWith('https://')){
-    errEl.textContent='กรุณากรอก Database URL ที่ถูกต้อง (เริ่มด้วย https://)';
-    errEl.style.display='';return;
-  }
-  errEl.textContent='กำลังทดสอบการเชื่อมต่อ...';
-  errEl.style.display='';errEl.style.color='var(--warn-txt)';
-  try{
-    const {initializeApp,getDatabase,ref,onValue,set}=window._fbImports;
-    const cfg={databaseURL:url,apiKey:'placeholder',authDomain:'placeholder',projectId:'placeholder',storageBucket:'placeholder',messagingSenderId:'placeholder',appId:'placeholder'};
-    // Check if already initialized
-    let app;
-    try{app=initializeApp(cfg,'tool-tracker-'+Date.now());}
-    catch(ex){app=initializeApp(cfg);}
-    const db=getDatabase(app);
-    const testRef=ref(db,(prefix?prefix+'/':'')+'tools');
-    // Test connection with timeout
-    const timer=setTimeout(()=>{
-      errEl.textContent='❌ เชื่อมต่อไม่ได้ — ตรวจสอบ Database URL และ Rules ใน Firebase Console';
-      errEl.style.display='';errEl.style.color='var(--danger-txt)';
-    },8000);
-    onValue(testRef,(snap)=>{
-      clearTimeout(timer);
-      localStorage.setItem(FB_CONFIG_KEY,JSON.stringify({url,prefix}));
-      fbApp=app;fbDb=db;fbPrefix=prefix;useFirebase=true;
-      initFirebase();
-    },{onlyOnce:true});
-  }catch(ex){
-    errEl.textContent='❌ เกิดข้อผิดพลาด: '+ex.message;
-    errEl.style.display='';errEl.style.color='var(--danger-txt)';
-  }
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  const idx={tasks:0,notify:1,settings:2}[name];
+  document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(name==='notify')renderWeek();
 }
 
-function skipFirebase(){
-  useFirebase=false;
-  document.getElementById('fb-setup-screen').style.display='none';
-  setConnStatus('offline');
-  loadLocalData();
+function changeDay(n){
+  const d=new Date(curDate+'T00:00:00');d.setDate(d.getDate()+n);
+  curDate=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+  renderAll();
 }
-
-function setConnStatus(state){
-  const badge=document.getElementById('conn-badge');
-  const txt=document.getElementById('conn-txt');
-  if(!badge)return;
-  badge.className='conn-badge '+state;
-  if(state==='online'){txt.textContent='Real-time';}
-  else if(state==='offline'){txt.textContent='Local only';}
-  else{txt.textContent='กำลังเชื่อมต่อ...';}
+function renderAll(){
+  document.getElementById('date-label').textContent=displayDate(curDate);
+  renderTasks();
+  updateStats();
 }
-
-function initFirebase(){
-  document.getElementById('fb-setup-screen').style.display='none';
-  setConnStatus('online');
-  const {ref,onValue,set}=window._fbImports;
-  const basePath=fbPrefix?fbPrefix+'/':'';
-  fbRef=ref(fbDb,basePath+'tools');
-  fbActRef=ref(fbDb,basePath+'actlog');
-
-  // Real-time listener for tools
-  onValue(fbRef,(snap)=>{
-    const data=snap.val();
-    if(data===null){
-      // First time — seed data
-      tools=JSON.parse(JSON.stringify(SEED));
-      set(fbRef,tools);
-    } else if(Array.isArray(data)){
-      tools=data;
-    } else {
-      tools=Object.values(data);
-    }
-    document.getElementById('loading-state').style.display='none';
-    document.getElementById('tbl-inner').style.display='';
-    document.getElementById('mobile-list').style.display='';
-    document.getElementById('pag').style.display='';
-    render();
-  });
-
-  // Real-time listener for actlog
-  onValue(fbActRef,(snap)=>{
-    const data=snap.val();
-    if(data){
-      if(Array.isArray(data)) actLog=data;
-      else actLog=Object.values(data).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
-    }
-    renderActLog();
-  });
-
-  // Connection state monitor
-  const connRef=ref(fbDb,'.info/connected');
-  onValue(connRef,(snap)=>{
-    setConnStatus(snap.val()?'online':'offline');
-  });
+function updateStats(){
+  const tasks=(getData()[todayStr()]||[]);
+  document.getElementById('stat-today').textContent=tasks.length;
+  document.getElementById('stat-done').textContent=tasks.filter(t=>t.priority==='done').length;
 }
-
-function loadData(){
-  // Check for saved Firebase config
-  const saved=localStorage.getItem(FB_CONFIG_KEY);
-  if(saved){
-    try{
-      const cfg=JSON.parse(saved);
-      document.getElementById('fb-url-inp').value=cfg.url||'';
-      document.getElementById('fb-prefix-inp').value=cfg.prefix||'';
-      // Auto-connect
-      connectFirebase();
-      return;
-    }catch(e){}
-  }
-  // Show setup screen (already visible by default)
-  document.getElementById('loading-state').textContent='กรุณาตั้งค่า Firebase ก่อนใช้งาน';
-}
-
-function loadLocalData(){
-  try{const r=localStorage.getItem(STORAGE_KEY);if(r){tools=JSON.parse(r);}else{tools=JSON.parse(JSON.stringify(SEED));saveData();}}
-  catch(e){tools=JSON.parse(JSON.stringify(SEED));}
-  document.getElementById('loading-state').style.display='none';
-  document.getElementById('tbl-inner').style.display='';
-  document.getElementById('mobile-list').style.display='';
-  document.getElementById('pag').style.display='';
-  render();
-  loadActLog();
-}
-
-function saveData(){
-  if(useFirebase && fbRef){
-    const {set}=window._fbImports;
-    set(fbRef,tools).catch(e=>console.warn('Firebase write error:',e));
-  } else {
-    try{localStorage.setItem(STORAGE_KEY,JSON.stringify(tools));}catch(e){}
-  }
-}
-
-function clkTick(){const el=document.getElementById('clk');if(!el)return;const n=new Date();el.textContent=n.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})+' '+n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
-setInterval(clkTick,1000);clkTick();
-
-function resetFirebaseConfig(){
-  if(!confirm('ต้องการเปลี่ยน Firebase Database URL ใช่ไหม?')) return;
-  localStorage.removeItem(FB_CONFIG_KEY);
-  location.reload();
-}
-function toggleAdmin(){if(isAdmin){isAdmin=false;updAdmin();}else{document.getElementById('lp').value='';document.getElementById('l-err').style.display='none';openOv('ov-login');setTimeout(()=>document.getElementById('lp').focus(),80);}}
-function doLogin(){if(document.getElementById('lp').value===ADMIN_PASS){isAdmin=true;closeOv('ov-login');updAdmin();}else{document.getElementById('l-err').style.display='';}}
-function updAdmin(){
-  const b=document.getElementById('admin-btn'),l=document.getElementById('admin-lbl'),ab=document.getElementById('admin-add-btn'),fb=document.getElementById('fb-reset-btn');
-  if(isAdmin){b.className='pill-btn pill-admin-on';l.textContent='Admin ON';ab.style.display='inline-flex';ab.style.alignItems='center';if(fb&&useFirebase)fb.style.display='inline-flex';}
-  else{b.className='pill-btn pill-admin-off';l.textContent='Admin';ab.style.display='none';if(fb)fb.style.display='none';}
-  render();
-}
-function locColor(loc){if(!loc)return'd-teal';let h=0;for(let c of loc)h=(h*31+c.charCodeAt(0))%LOC_DOTS.length;return LOC_DOTS[h];}
-function fmtDate(s){if(!s)return'—';const d=new Date(s);return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});}
-function isOver(d,s){if(!d||s!=='in-use')return false;return new Date(d)<new Date();}
-function updMetrics(){
-  document.getElementById('m-all').textContent=tools.length;
-  document.getElementById('m-use').textContent=tools.filter(t=>t.status==='in-use').length;
-  document.getElementById('m-avail').textContent=tools.filter(t=>t.status==='available').length;
-  document.getElementById('m-maint').textContent=tools.filter(t=>t.status==='maintenance').length;
-}
-
-function render(){
-  updMetrics();
-  const q=document.getElementById('srch').value.toLowerCase(),fs=document.getElementById('flt-s').value;
-  let rows=tools.filter(t=>{
-    const mq=!q||t.name.toLowerCase().includes(q)||t.id.toLowerCase().includes(q)||(t.user&&t.user.toLowerCase().includes(q))||(t.loc&&t.loc.toLowerCase().includes(q));
-    return mq&&(!fs||t.status===fs);
-  });
-  const tot=Math.max(1,Math.ceil(rows.length/PER));if(pg>tot)pg=1;
-  const paged=rows.slice((pg-1)*PER,pg*PER);
-
-  // Desktop
-  const tbody=document.getElementById('tbody');
-  document.getElementById('empty-state').style.display=paged.length===0?'':'none';
-  tbody.innerHTML=paged.map(t=>{
-    const ri=tools.findIndex(x=>x.id===t.id),over=isOver(t.due,t.status);
-    const dot=t.img?`<span style="width:6px;height:6px;border-radius:50%;background:var(--brand);display:inline-block;margin-left:4px;vertical-align:middle;box-shadow:0 0 0 2px var(--brand-light)"></span>`:'';
-    let acts='';
-    if(t.status==='available')acts+=`<button class="ab borrow-btn" onclick="openReturnOrBorrow(${ri},'borrow')">ยืม</button>`;
-    else if(t.status==='in-use')acts+=`<button class="ab return-btn" onclick="openReturnOrBorrow(${ri},'return')">คืน</button>`;
-    if(isAdmin)acts+=`<button class="ab" style="font-size:11px;margin-top:4px" onclick="openEdit(${ri})">✎ แก้ไข</button>`;
-    return `<tr>
-      <td><div><span class="tool-name-link" onmouseenter="showTip(event,${ri})" onmouseleave="hideTip()">${t.name}${dot}</span><div class="tool-sub">${t.id}${t.cat?' · '+t.cat:''}</div></div></td>
-      <td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text2)">${t.id}</td>
-      <td style="font-size:13px">${t.user||'—'}</td>
-      <td style="font-size:13px">${t.loc?`<span class="ldot ${locColor(t.loc)}"></span>${t.loc}`:'—'}</td>
-      <td style="font-size:12px">${fmtDate(t.from)}</td>
-      <td style="font-size:12px;color:${over?'var(--danger-txt)':'inherit'};font-weight:${over?'600':'400'}">${fmtDate(t.due)}${over?' ⚠':''}</td>
-      <td><span class="badge ${t.status}">${STATUS_TH[t.status]}</span></td>
-      <td><div class="ab-col">${acts}</div></td>
-    </tr>`;
+function renderTasks(){
+  const tasks=((getData()[curDate])||[]).sort((a,b)=>a.time.localeCompare(b.time));
+  const el=document.getElementById('task-list');
+  if(!tasks.length){el.innerHTML='<div class="empty-state"><span class="empty-icon">📋</span>ยังไม่มีงานในวันนี้<br>กดเพิ่มงานด้านบนได้เลย</div>';return}
+  el.innerHTML=tasks.map((t,i)=>{
+    const cls=t.priority==='high'?'t-high':t.priority==='done'?'t-done':'t-normal';
+    const badge=t.priority==='high'?'<span class="badge badge-high">ด่วน</span>':t.priority==='done'?'<span class="badge badge-done">เสร็จ</span>':'';
+    return`<div class="task-item ${cls}"><span class="t-time">${t.time}</span><span class="t-text">${esc(t.text)}${badge}</span><button class="t-del" onclick="deleteTask(${i})" aria-label="ลบ">✕</button></div>`;
   }).join('');
-
-  // Mobile cards
-  const mc=document.getElementById('mobile-cards');
-  document.getElementById('empty-state-m').style.display=paged.length===0?'':'none';
-  mc.innerHTML=paged.map(t=>{
-    const ri=tools.findIndex(x=>x.id===t.id),over=isOver(t.due,t.status);
-    const dot=t.img?`<span style="width:7px;height:7px;border-radius:50%;background:var(--brand);display:inline-block;margin-left:5px;vertical-align:middle"></span>`:'';
-    let acts='';
-    if(t.status==='available')acts+=`<button class="ab borrow-btn" onclick="openReturnOrBorrow(${ri},'borrow')">ยืม</button>`;
-    else if(t.status==='in-use')acts+=`<button class="ab return-btn" onclick="openReturnOrBorrow(${ri},'return')">คืน</button>`;
-    acts+=`<button class="ab" onclick="showDetail(${ri})">รายละเอียด</button>`;
-    if(isAdmin)acts+=`<button class="ab" onclick="openEdit(${ri})">✎ แก้ไข</button>`;
-    return `<div class="m-card">
-      <div class="m-card-top">
-        <div><div class="m-card-name">${t.name}${dot}</div><div class="m-card-code">${t.id}${t.cat?' · '+t.cat:''}</div></div>
-        <span class="badge ${t.status}" style="flex-shrink:0">${STATUS_TH[t.status]}</span>
-      </div>
-      <div class="m-card-meta">
-        <div class="m-meta-item"><span class="m-meta-label">ผู้ใช้</span><span class="m-meta-val">${t.user||'—'}</span></div>
-        <div class="m-meta-item"><span class="m-meta-label">สถานที่</span><span class="m-meta-val">${t.loc||'—'}</span></div>
-        <div class="m-meta-item"><span class="m-meta-label">ยืมเมื่อ</span><span class="m-meta-val">${fmtDate(t.from)}</span></div>
-        <div class="m-meta-item"><span class="m-meta-label">คืนวันที่</span><span class="m-meta-val" style="color:${over?'var(--danger-txt)':'inherit'};font-weight:${over?'600':'400'}">${fmtDate(t.due)}${over?' ⚠':''}</span></div>
-      </div>
-      <div class="m-card-actions">${acts}</div>
+}
+function addTask(){
+  const time=document.getElementById('task-time').value;
+  const text=document.getElementById('task-text').value.trim();
+  const priority=document.getElementById('task-priority').value;
+  if(!text){document.getElementById('task-text').focus();return}
+  const data=getData();
+  if(!data[curDate])data[curDate]=[];
+  data[curDate].push({time,text,priority});
+  saveData(data);
+  document.getElementById('task-text').value='';
+  renderTasks();updateStats();
+}
+function deleteTask(i){
+  const data=getData();
+  if(data[curDate]){data[curDate].splice(i,1);saveData(data);renderTasks();updateStats()}
+}
+function renderWeek(){
+  const days=['อา','จ','อ','พ','พฤ','ศ','ส'];
+  let html='';
+  for(let i=-3;i<=3;i++){
+    const d=new Date();d.setDate(d.getDate()+i);
+    const ds=d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+    const tasks=(getData()[ds]||[]);
+    const count=tasks.length;
+    const done=tasks.filter(t=>t.priority==='done').length;
+    const isToday=ds===todayStr();
+    html+=`<div style="display:flex;align-items:center;gap:10px;padding:4px 0;${isToday?'font-weight:600;color:var(--pt)':''}">
+      <span style="min-width:20px;font-size:12px">${days[d.getDay()]}</span>
+      <span style="font-size:12px;min-width:60px">${d.getDate()} ${['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'][d.getMonth()]}</span>
+      <span style="flex:1;font-size:13px">${count?count+' งาน'+(done?' (เสร็จ '+done+')'  :''):'—'}</span>
     </div>`;
-  }).join('');
-
-  // Pagination
-  document.getElementById('pag-info').textContent=`แสดง ${rows.length===0?0:(pg-1)*PER+1}–${Math.min(pg*PER,rows.length)} จาก ${rows.length} รายการ`;
-  const pb=document.getElementById('pag-btns');pb.innerHTML='';
-  for(let p=1;p<=tot;p++){const b=document.createElement('button');b.className='pb'+(p===pg?' active':'');b.textContent=p;b.onclick=(p=>{return()=>{pg=p;render();window.scrollTo(0,0);};})(p);pb.appendChild(b);}
+  }
+  document.getElementById('week-summary').innerHTML=html;
 }
 
-// Detail modal (mobile)
-function showDetail(ri){
-  const t=tools[ri];
-  document.getElementById('detail-title').textContent=t.name;
-  const imgHtml=t.img
-    ?`<img src="${t.img}" class="detail-img" loading="eager" decoding="sync">`
-    :`<div class="detail-img-placeholder"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>ยังไม่มีรูปภาพ</span></div>`;
-  const hc=t.hist?t.hist.length:0;
-  document.getElementById('detail-body').innerHTML=`
-    ${imgHtml}
-    <div class="detail-row"><span>รหัส</span><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">${t.id}</span></div>
-    <div class="detail-row"><span>หมวดหมู่</span><span>${t.cat||'—'}</span></div>
-    <div class="detail-row"><span>สถานะ</span><span class="badge ${t.status}">${STATUS_TH[t.status]}</span></div>
-    <div class="detail-row"><span>ผู้ใช้ปัจจุบัน</span><span>${t.user||'—'}</span></div>
-    <div class="detail-row"><span>แผนก</span><span>${t.dept||'—'}</span></div>
-    <div class="detail-row"><span>สถานที่ใช้</span><span>${t.loc||'—'}</span></div>
-    <div class="detail-row"><span>วันที่ยืม</span><span>${fmtDate(t.from)}</span></div>
-    <div class="detail-row"><span>กำหนดคืน</span><span style="color:${isOver(t.due,t.status)?'var(--danger-txt)':'inherit'}">${fmtDate(t.due)}</span></div>
-    <div class="detail-row"><span>วัตถุประสงค์</span><span>${t.note||'—'}</span></div>
-  `;
-  const da=document.getElementById('detail-actions');
-  let btns=`<button class="btn-cancel" onclick="closeOv('ov-detail')">ปิด</button>`;
-  btns+=`<button class="btn-cancel" onclick="closeOv('ov-detail');showHist(${ri})">ประวัติ (${hc})</button>`;
-  da.innerHTML=btns;
-  openOv('ov-detail');
-}
-
-// Tooltip (desktop)
-function showTip(e,ri){
-  clearTimeout(tipTO);const t=tools[ri];const tip=document.getElementById('tip');
-  const imgHtml=t.img
-    ?`<img src="${t.img}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--r-sm);image-rendering:auto;transform:translateZ(0)" loading="eager" decoding="sync">`
-    :`<div style="display:flex;flex-direction:column;align-items:center;gap:5px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".18"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span style="font-size:10px;color:var(--text3)">ยังไม่มีรูปภาพ</span></div>`;
-  const hc=t.hist?t.hist.length:0;
-  const adminBtn=isAdmin?`<button class="tip-admin-btn" onmouseenter="tipKeep=true" onmouseleave="tipKeep=false" onclick="openEdit(${ri});hideTipNow()"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M11 2l3 3-8 8H3v-3L11 2z"/></svg>แก้ไขรูปภาพ (Admin)</button>`:'';
-  tip.innerHTML=`
-    <div class="tip-img">${imgHtml}</div>
-    <div class="tip-name">${t.name}</div>
-    <div class="tip-code">${t.id}${t.cat?' · '+t.cat:''}</div>
-    <div class="tip-row"><span>สถานะ</span><span class="badge ${t.status}" style="font-size:10.5px;padding:2px 8px">${STATUS_TH[t.status]}</span></div>
-    <div class="tip-row"><span>ผู้ใช้</span><span style="font-weight:500;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.user||'—'}</span></div>
-    <div class="tip-row"><span>สถานที่</span><span style="max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.loc||'—'}</span></div>
-    <div class="tip-row"><span>ประวัติ</span><span>${hc} รายการ &nbsp;<span style="cursor:pointer;color:var(--brand);text-decoration:underline;font-weight:500" onclick="showHist(${ri})">ดู</span></span></div>
-    ${adminBtn}
-  `;
-  tip.classList.add('show');posTip(e);
-}
-function posTip(e){
-  const tip=document.getElementById('tip'),tw=225,th=340;
-  let x=e.clientX+18,y=e.clientY-20;
-  if(x+tw>window.innerWidth-12)x=e.clientX-tw-18;
-  if(y+th>window.innerHeight-12)y=Math.max(12,window.innerHeight-th-12);
-  tip.style.left=x+'px';tip.style.top=y+'px';
-}
-document.addEventListener('mousemove',e=>{if(document.getElementById('tip').classList.contains('show'))posTip(e);});
-function hideTip(){tipTO=setTimeout(()=>{if(!tipKeep)hideTipNow();},130);}
-function hideTipNow(){document.getElementById('tip').classList.remove('show');}
-
-function openOv(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
-function closeOv(id){document.getElementById(id).classList.remove('open');const anyOpen=[...document.querySelectorAll('.overlay.open')].length>0;if(!anyOpen)document.body.style.overflow='';}
-
-function checkToolStatus(val){
-  const box = document.getElementById('tool-status-box');
-  const confirmBtn = document.getElementById('borrow-confirm-btn');
-  if(val === ''){box.style.display='none';if(confirmBtn)confirmBtn.disabled=false;return;}
-  const t = tools[parseInt(val)];
-  if(!t){box.style.display='none';return;}
-  if(t.status === 'available'){
-    box.className = 'tool-status-box available';
-    box.innerHTML = '<span class="tool-status-box-icon">✅</span> เครื่องมือนี้<b>ว่างพร้อมใช้งาน</b>';
-    box.style.display = '';
-    if(confirmBtn) confirmBtn.disabled = false;
-  } else if(t.status === 'in-use'){
-    box.className = 'tool-status-box in-use';
-    box.innerHTML = `<span class="tool-status-box-icon">⚠️</span> เครื่องมือนี้<b>กำลังถูกใช้งานอยู่</b><br>
-      <span style="font-size:12px">ผู้ใช้: <b>${t.user||'—'}</b> &nbsp;|&nbsp; สถานที่: ${t.loc||'—'}</span><br>
-      <span style="font-size:12px">กำหนดคืน: ${t.due ? new Date(t.due).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}) : '—'}</span>`;
-    box.style.display = '';
-    if(confirmBtn) confirmBtn.disabled = true;
-  } else if(t.status === 'maintenance'){
-    box.className = 'tool-status-box maintenance';
-    box.innerHTML = '<span class="tool-status-box-icon">🔧</span> เครื่องมือนี้<b>อยู่ระหว่างซ่อมบำรุง</b> ไม่สามารถยืมได้';
-    box.style.display = '';
-    if(confirmBtn) confirmBtn.disabled = true;
-  } else if(t.status === 'returned'){
-    box.className = 'tool-status-box available';
-    box.innerHTML = '<span class="tool-status-box-icon">↩️</span> เครื่องมือนี้<b>เพิ่งถูกคืนแล้ว</b> สามารถยืมได้ทันที';
-    box.style.display = '';
-    if(confirmBtn) confirmBtn.disabled = false;
-  } else {
-    box.style.display = 'none';
-    if(confirmBtn) confirmBtn.disabled = false;
-  }
-}
-
-function openBorrow(preselect){
-  document.getElementById('b-user').value='';
-  document.getElementById('b-dept').value='';
-  document.getElementById('b-loc').value='';
-  document.getElementById('b-note').value='';
-  document.getElementById('b-err').style.display='none';
-  document.getElementById('tool-status-box').style.display='none';
-  const confirmBtn=document.getElementById('borrow-confirm-btn');
-  if(confirmBtn) confirmBtn.disabled=false;
-  const sel=document.getElementById('b-tool');
-  sel.innerHTML='<option value="">-- เลือกเครื่องมือ --</option>';
-  // Show ALL tools with status indicator
-  tools.forEach((t,i)=>{
-    const o=document.createElement('option');
-    o.value=i;
-    const statusLabel = t.status==='available'?'✅ ว่าง': t.status==='in-use'?'⚠️ กำลังใช้': t.status==='maintenance'?'🔧 ซ่อม':'↩️ คืนแล้ว';
-    o.textContent=`${t.name} (${t.id}) — ${statusLabel}`;
-    if(t.status!=='available'&&t.status!=='returned') o.style.color='#9CA3AF';
-    sel.appendChild(o);
-  });
-  if(typeof preselect!=='undefined'){
-    sel.value=preselect;
-    checkToolStatus(String(preselect));
-  }
-  const td=new Date();td.setDate(td.getDate()+3);
-  document.getElementById('b-from').value=new Date().toISOString().slice(0,10);
-  document.getElementById('b-due').value=td.toISOString().slice(0,10);
-  openOv('ov-borrow');
-}
-function openReturnOrBorrow(ri,mode){
-  if(mode==='borrow'){openBorrow(ri);}
-  else{
-    retIdx=ri;const t=tools[ri];
-    document.getElementById('ret-info').innerHTML=`<b style="font-size:14px">${t.name}</b> <span style="font-size:12px;color:var(--text2)">(${t.id})</span><br><span style="font-size:12px">ผู้ยืม: <b>${t.user||'—'}</b> &nbsp;|&nbsp; ยืมเมื่อ: ${fmtDate(t.from)}</span><br><span style="font-size:12px">สถานที่: ${t.loc||'—'}</span>`;
-    document.getElementById('r-user').value='';document.getElementById('r-note').value='';
-    document.getElementById('r-cond').value='ok';document.getElementById('r-err').style.display='none';
-    openOv('ov-return');
-  }
-}
-function saveBorrow(){
-  const user=document.getElementById('b-user').value.trim();
-  const loc=document.getElementById('b-loc').value.trim();
-  const ti=document.getElementById('b-tool').value;
-  const errEl=document.getElementById('b-err');
-  if(!user||!loc||ti===''){
-    errEl.textContent='กรุณากรอกข้อมูลให้ครบ (ชื่อ, เครื่องมือ, สถานที่)';
-    errEl.style.display='';return;
-  }
-  const idx=parseInt(ti);
-  const t=tools[idx];
-  if(!t){errEl.textContent='ไม่พบเครื่องมือ กรุณาเลือกใหม่';errEl.style.display='';return;}
-  if(t.status!=='available'&&t.status!=='returned'){
-    errEl.textContent='เครื่องมือนี้ไม่ว่าง กรุณาเลือกเครื่องมืออื่น';
-    errEl.style.display='';return;
-  }
-  const from=document.getElementById('b-from').value||new Date().toISOString().slice(0,10);
-  const due=document.getElementById('b-due').value||null;
-  const note=document.getElementById('b-note').value.trim();
-  const dept=document.getElementById('b-dept').value.trim();
-  t.status='in-use';t.user=user;t.dept=dept;t.loc=loc;t.from=from;t.due=due;t.note=note;
-  if(!t.hist)t.hist=[];t.hist.unshift({act:'ยืม',user,dept,date:from,loc,note});
-  saveData();
-  pushAct('borrow',`<b>${user}</b> ยืม <b>${t.name}</b>`,`📍 ${loc}${dept?' &nbsp;·&nbsp; '+dept:''}`);
-  closeOv('ov-borrow');render();
-}
-function saveReturn(){
-  if(retIdx===null)return;
-  const ru=document.getElementById('r-user').value.trim();
-  if(!ru){document.getElementById('r-err').style.display='';return;}
-  const t=tools[retIdx];
-  const retToolName=t.name;
-  const cond=document.getElementById('r-cond').value,note=document.getElementById('r-note').value.trim();
-  t.status=cond==='damaged'?'maintenance':'available';
-  if(!t.hist)t.hist=[];t.hist.unshift({act:'คืน',user:ru,dept:'',date:new Date().toISOString().slice(0,10),note:`สภาพ: ${cond==='ok'?'ปกติ':'ชำรุด'}${note?' | '+note:''}`});
-  t.user=null;t.dept=null;t.loc=null;t.from=null;t.due=null;t.note=null;
-  saveData();
-  pushAct('return', `<b>${ru}</b> คืน <b>${retToolName}</b>`, cond==='ok'?'สภาพ: ✅ ปกติ':'สภาพ: ⚠️ ชำรุด — ส่งซ่อม');
-  closeOv('ov-return');retIdx=null;render();
-}
-function showHist(ri){
-  hideTipNow();const t=tools[ri];
-  document.getElementById('hist-title').textContent='ประวัติ: '+t.name;
-  const hb=document.getElementById('hist-body');
-  if(!t.hist||t.hist.length===0){hb.innerHTML='<p style="font-size:13px;color:var(--text3);padding:1rem 0;text-align:center">ยังไม่มีประวัติ</p>';}
-  else{
-    hb.innerHTML=t.hist.map(h=>{
-      const actClass=h.act==='ยืม'?'borrow':h.act==='คืน'?'return':'repair';
-      return `<div class="hist-row">
-        <div>
-          <span class="hist-act ${actClass}">${h.act}</span>
-          <span style="color:var(--text2);font-size:12px"> — ${h.user}</span>
-          ${h.dept?`<span style="color:var(--text3);font-size:11px"> (${h.dept})</span>`:''}
-          ${h.loc&&h.loc!='—'?`<div style="font-size:11px;color:var(--text3)">📍 ${h.loc}</div>`:''}
-          ${h.note?`<div style="font-size:11px;color:var(--text3)">${h.note}</div>`:''}
-        </div>
-        <span style="font-size:11px;color:var(--text3);white-space:nowrap;margin-left:8px">${fmtDate(h.date)}</span>
-      </div>`;
-    }).join('');
-  }
-  openOv('ov-hist');
-}
-function openAdd(){
-  editIdx=null;editId=null;pendImg=null;
-  document.getElementById('add-title').textContent='เพิ่มเครื่องมือใหม่';
-  ['a-name','a-code','a-cat'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('a-status').value='available';
-  document.getElementById('img-preview').style.display='none';
-  document.getElementById('img-preview').src='';
-  document.getElementById('a-img-inp').value='';
-  document.getElementById('a-del-btn').style.display='none';
-  document.getElementById('a-err').style.display='none';
-  document.getElementById('img-current-wrap').innerHTML='';
-  document.getElementById('img-clear-wrap').style.display='none';
-  openOv('ov-add');
-}
-function openEdit(ri){
-  editIdx=ri;editId=tools[ri]?tools[ri].id:null;pendImg=null;const t=tools[ri];
-  document.getElementById('add-title').textContent='แก้ไข: '+t.name;
-  document.getElementById('a-name').value=t.name;
-  document.getElementById('a-code').value=t.id;
-  document.getElementById('a-cat').value=t.cat||'';
-  document.getElementById('a-status').value=t.status;
-  document.getElementById('a-del-btn').style.display='';
-  document.getElementById('a-err').style.display='none';
-  const cw=document.getElementById('img-current-wrap');
-  if(t.img){
-    cw.innerHTML=`<img src="${t.img}" class="img-current-preview" loading="eager" decoding="sync">`;
-    document.getElementById('img-clear-wrap').style.display='';
-  } else {
-    cw.innerHTML='';
-    document.getElementById('img-clear-wrap').style.display='none';
-  }
-  document.getElementById('img-preview').style.display='none';
-  document.getElementById('img-preview').src='';
-  document.getElementById('a-img-inp').value='';
-  hideTipNow();
-  openOv('ov-add');
-}
-function prevImg(e){
-  const f=e.target.files[0];if(!f)return;
-  // Compress image before storing for crisp display
-  const reader=new FileReader();
-  reader.onload=ev=>{
-    const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const MAX=1200; // max dimension for crisp quality
-      let w=img.width,h=img.height;
-      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*(MAX/w));w=MAX;}else{w=Math.round(w*(MAX/h));h=MAX;}}
-      canvas.width=w;canvas.height=h;
-      const ctx=canvas.getContext('2d');
-      ctx.imageSmoothingEnabled=true;
-      ctx.imageSmoothingQuality='high';
-      ctx.drawImage(img,0,0,w,h);
-      pendImg=canvas.toDataURL('image/jpeg',0.92);
-      const p=document.getElementById('img-preview');p.src=pendImg;p.style.display='';
-      document.getElementById('img-clear-wrap').style.display='';
-    };
-    img.src=ev.target.result;
-  };
-  reader.readAsDataURL(f);
-}
-function clearImg(){
-  pendImg='__clear__';
-  document.getElementById('img-preview').style.display='none';
-  document.getElementById('img-preview').src='';
-  document.getElementById('img-current-wrap').innerHTML='';
-  document.getElementById('img-clear-wrap').style.display='none';
-}
-function saveTool(){
-  const name=document.getElementById('a-name').value.trim(),code=document.getElementById('a-code').value.trim();
-  if(!name||!code){document.getElementById('a-err').style.display='';return;}
-  if(editId!==null){
-    const realIdx=tools.findIndex(x=>x.id===editId);
-    if(realIdx===-1){document.getElementById('a-err').style.display='';return;}
-    const t=tools[realIdx];t.name=name;t.id=code;t.cat=document.getElementById('a-cat').value.trim();t.status=document.getElementById('a-status').value;
-    if(pendImg==='__clear__')t.img=null;
-    else if(pendImg!==null)t.img=pendImg;
-  } else {
-    tools.push({id:code,name,cat:document.getElementById('a-cat').value.trim(),status:document.getElementById('a-status').value,user:null,dept:null,loc:null,from:null,due:null,note:null,img:pendImg==='__clear__'?null:pendImg,hist:[]});
-  }
-  saveData();
-  if(editId!==null){
-    pushAct('edit',`Admin แก้ไข <b>${name}</b>`,`รหัส: ${code}`);
-  } else {
-    pushAct('add',`Admin เพิ่มเครื่องมือ <b>${name}</b>`,`รหัส: ${code}`);
-  }
-  closeOv('ov-add');editIdx=null;editId=null;pendImg=null;render();
-}
-function deleteTool(){
-  if(!isAdmin){alert('กรุณาเข้าสู่ระบบ Admin ก่อน');return;}
-  if(editIdx===null||editIdx<0||editIdx>=tools.length)return;
-  const delName=tools[editIdx].name;
-  const delId=tools[editIdx].id;
-  if(!confirm('ต้องการลบ "'+delName+'" ใช่ไหม?'))return;
-  const realIdx=tools.findIndex(x=>x.id===delId);
-  if(realIdx===-1)return;
-  tools.splice(realIdx,1);
-  saveData();
-  pushAct('delete',`Admin ลบเครื่องมือ <b>${delName}</b>`,'');
-  closeOv('ov-add');editIdx=null;render();
-}
-
-// ── ACTIVITY LOG ──
-const ACT_KEY = 'tool-tracker-actlog-v3';
-let actLog = [];
-let actLogOpen = true;
-
-function loadActLog(){
+async function fetchChatId(){
+  const token=document.getElementById('bot-token').value.trim();
+  if(!token){setLog('config-log','กรุณาใส่ Bot Token ก่อน','err');return}
+  setLog('config-log','กำลังดึง Chat ID...','warn');
   try{
-    const r = localStorage.getItem(ACT_KEY);
-    if(r) actLog = JSON.parse(r);
-  } catch(e){ actLog = []; }
-  renderActLog();
+    const res=await fetch('https://api.telegram.org/bot'+token+'/getUpdates');
+    const data=await res.json();
+    if(!data.ok){setLog('config-log','Token ไม่ถูกต้อง: '+data.description,'err');return}
+    if(!data.result?.length){setLog('config-log','ส่งข้อความหาบอทก่อน แล้วลองใหม่','warn');return}
+    const last=data.result[data.result.length-1];
+    const chatId=last.message?.chat?.id||last.channel_post?.chat?.id;
+    if(!chatId){setLog('config-log','ไม่พบ Chat ID ลองส่งข้อความหาบอทอีกครั้ง','warn');return}
+    document.getElementById('chat-id').value=chatId;
+    setLog('config-log','พบ Chat ID: '+chatId+' ✓','ok');
+  }catch{setLog('config-log','เกิดข้อผิดพลาด ตรวจสอบ Token','err')}
+}
+function saveConfig(){
+  const token=document.getElementById('bot-token').value.trim();
+  const chatId=document.getElementById('chat-id').value.trim();
+  if(!token||!chatId){setLog('config-log','กรุณากรอกให้ครบทั้ง Token และ Chat ID','err');return}
+  localStorage.setItem(CFG,JSON.stringify({token,chatId}));
+  setLog('config-log','บันทึกการตั้งค่าแล้ว ✓','ok');
+}
+function buildMsg(dateStr){
+  const tasks=((getData()[dateStr])||[]).sort((a,b)=>a.time.localeCompare(b.time));
+  const dt=new Date(dateStr+'T00:00:00');
+  const days=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
+  const months=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const[y,m,d]=dateStr.split('-');
+  let msg='📋 *งานวัน'+days[dt.getDay()]+'ที่ '+d+' '+months[parseInt(m)-1]+' '+(parseInt(y)+543)+'*\n'+'─'.repeat(26)+'\n';
+  if(!tasks.length){msg+='✅ ไม่มีงานในวันนี้';return msg}
+  tasks.forEach(t=>{const icon=t.priority==='done'?'✅':t.priority==='high'?'🔴':'🔵';msg+=icon+' '+t.time+' — '+t.text+'\n'});
+  msg+='─'.repeat(26)+'\nรวม '+tasks.length+' งาน';
+  return msg;
+}
+function previewMsg(){
+  const msg=buildMsg(curDate).replace(/\*/g,'');
+  document.getElementById('preview-text').textContent=msg;
+  const pb=document.getElementById('preview-box');
+  pb.style.display=pb.style.display==='block'?'none':'block';
+}
+async function sendNow(){
+  const cfg=getCfg();
+  if(!cfg.token||!cfg.chatId){setLog('send-log','ยังไม่ได้บันทึกการตั้งค่า Telegram','err');return}
+  const btn=document.getElementById('send-btn');
+  btn.disabled=true;btn.textContent='⏳ กำลังส่ง...';
+  try{
+    const res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:cfg.chatId,text:buildMsg(curDate),parse_mode:'Markdown'})
+    });
+    const data=await res.json();
+    data.ok?setLog('send-log','ส่ง Telegram สำเร็จ ✓','ok'):setLog('send-log','ส่งไม่สำเร็จ: '+data.description,'err');
+  }catch{setLog('send-log','เกิดข้อผิดพลาด ตรวจสอบการเชื่อมต่อ','err')}
+  btn.disabled=false;btn.innerHTML='✈️ ส่งแจ้งเตือนตอนนี้';
+}
+function toggleAuto(){
+  const on=document.getElementById('auto-toggle').checked;
+  clearInterval(autoTimer);
+  if(on){checkAutoSend();autoTimer=setInterval(checkAutoSend,30000)}
+}
+function checkAutoSend(){
+  const target=document.getElementById('auto-time').value;
+  const now=new Date();
+  const curr=pad(now.getHours())+':'+pad(now.getMinutes());
+  const key='tg_sent_'+todayStr();
+  if(curr===target&&!localStorage.getItem(key)){localStorage.setItem(key,'1');const s=curDate;curDate=todayStr();sendNow();curDate=s}
+}
+function clearOldData(){
+  const data=getData();const today=new Date(todayStr());let count=0;
+  Object.keys(data).forEach(k=>{const diff=Math.round((today-new Date(k))/86400000);if(diff>30){delete data[k];count++}});
+  saveData(data);setLog('config-log','ลบข้อมูลเก่า '+count+' วัน ✓','ok');
 }
 
-function saveActLog(){
-  if(useFirebase && fbActRef){
-    const {set}=window._fbImports;
-    set(fbActRef, actLog.slice(0,100)).catch(e=>console.warn('Firebase actlog write error:',e));
-  } else {
-    try{ localStorage.setItem(ACT_KEY, JSON.stringify(actLog.slice(0,100))); } catch(e){}
-  }
-}
-
-function pushAct(type, text, sub){
-  const now = new Date();
-  actLog.unshift({
-    type, text, sub,
-    ts: now.toISOString(),
-    isNew: true
-  });
-  if(actLog.length > 100) actLog.pop();
-  saveActLog();
-  renderActLog();
-  // clear isNew after animation
-  setTimeout(()=>{
-    if(actLog[0]) actLog[0].isNew = false;
-  }, 1500);
-}
-
-const ACT_ICONS = {
-  borrow: {cls:'borrow', icon:'📤'},
-  return: {cls:'return', icon:'📥'},
-  repair: {cls:'repair', icon:'🔧'},
-  add:    {cls:'add',    icon:'➕'},
-  edit:   {cls:'edit',   icon:'✏️'},
-  delete: {cls:'delete', icon:'🗑️'},
-};
-
-function fmtAbsTime(iso){
-  const d = new Date(iso);
-  return d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'}) +
-         ' ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
-}
-
-function fmtRelTime(iso){
-  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if(diff < 10) return 'เพิ่งกี้นี้';
-  if(diff < 60) return `${Math.floor(diff)} วิที่แล้ว`;
-  if(diff < 3600) return `${Math.floor(diff/60)} นาทีที่แล้ว`;
-  if(diff < 86400) return `${Math.floor(diff/3600)} ชม.ที่แล้ว`;
-  return fmtAbsTime(iso);
-}
-
-function renderActLog(){
-  const list = document.getElementById('act-list');
-  const empty = document.getElementById('act-empty');
-  const count = document.getElementById('act-count');
-  if(!list||!empty||!count) return;
-  count.textContent = actLog.length;
-
-  if(actLog.length === 0){
-    empty.style.display = '';
-    list.innerHTML = '';
-    return;
-  }
-  empty.style.display = 'none';
-
-  list.innerHTML = actLog.map((a, i) => {
-    const ic = ACT_ICONS[a.type] || {cls:'edit', icon:'📌'};
-    const newDot = i === 0 ? '<span class="act-new-dot"></span>' : '';
-    return `<div class="act-row">
-      ${newDot}
-      <div class="act-icon ${ic.cls}">${ic.icon}</div>
-      <div class="act-body">
-        <div class="act-main">${a.text}</div>
-        ${a.sub ? `<div class="act-sub">${a.sub}</div>` : ''}
-      </div>
-      <div class="act-time" title="${a.ts}">
-        <div style="color:var(--text2);font-size:11px;font-weight:500;font-family:'Sarabun',sans-serif">${fmtRelTime(a.ts)}</div>
-        <div style="color:var(--text3);font-size:10px;margin-top:1px">${fmtAbsTime(a.ts)}</div>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function toggleActivityLog(){
-  const body = document.getElementById('act-body');
-  const toggle = document.getElementById('act-toggle');
-  const txt = document.getElementById('act-toggle-txt');
-  actLogOpen = !actLogOpen;
-  if(actLogOpen){
-    body.classList.remove('hidden');
-    txt.textContent = 'ซ่อน';
-    toggle.classList.remove('collapsed');
-  } else {
-    body.classList.add('hidden');
-    txt.textContent = 'แสดง';
-    toggle.classList.add('collapsed');
-  }
-}
-
-// Auto refresh relative times every 30s
-setInterval(renderActLog, 30000);
-
-document.addEventListener('DOMContentLoaded', function(){
-  loadData();
-  if(!useFirebase) loadActLog();
-  registerSW();
-});
-
-// ── PWA SERVICE WORKER ──
-function registerSW(){
-  // Blob URL cannot be used as SW - skip SW registration in single-file mode
-  // Data is stored in localStorage so offline works without SW
-}
-
-// ── PWA INSTALL PROMPT ──
-let deferredPrompt=null;
-
-function detectPlatform(){
-  const ua=navigator.userAgent;
-  if(/iphone|ipad|ipod/i.test(ua))return'ios';
-  if(/android/i.test(ua))return'android';
-  return'other';
-}
-
-function isStandalone(){
-  return window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
-}
-
+// PWA Install
 window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  deferredPrompt=e;
-  // Show install button in top bar
-  const btn=document.getElementById('pwa-install-btn');
-  if(btn)btn.style.display='';
-  // Show android install button in modal
-  const ab=document.getElementById('pwa-android-btn');
-  if(ab)ab.style.display='';
+  e.preventDefault();deferredPrompt=e;
+  document.getElementById('install-banner').classList.add('show');
+  document.getElementById('install-sub').textContent='กดปุ่มด้านล่างเพื่อติดตั้ง Daily Task Reminder บนหน้าจอหลักของคุณ';
+  document.getElementById('install-btn').style.display='inline-flex';
+  document.getElementById('install-card-content').innerHTML='<button class="btn btn-primary" onclick="installApp()">📲 ติดตั้งบนหน้าจอหลัก</button>';
 });
-
-window.addEventListener('appinstalled',()=>{
-  deferredPrompt=null;
-  const btn=document.getElementById('pwa-install-btn');
-  if(btn)btn.style.display='none';
-});
-
-function handleInstallClick(){
-  openOv('ov-pwa');
-  // If Android with prompt ready, show install button in modal
-  if(deferredPrompt){
-    const ab=document.getElementById('pwa-android-btn');
-    if(ab)ab.style.display='';
-  }
+function installApp(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(r=>{if(r.outcome==='accepted'){document.getElementById('install-banner').classList.remove('show')};deferredPrompt=null})}
+}
+const isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+const isStandalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone;
+if(isIOS&&!isStandalone){
+  document.getElementById('install-banner').classList.add('show');
+  document.getElementById('install-sub').textContent='ติดตั้งเป็นแอปบน iPhone/iPad ของคุณ:';
+  document.getElementById('ios-guide').style.display='block';
+  document.getElementById('install-card-content').innerHTML='<div class="ios-guide">กด <strong>แชร์</strong> (⬆️) → <strong>"เพิ่มไปยังหน้าจอหลัก"</strong></div>';
 }
 
-function triggerAndroidInstall(){
-  if(!deferredPrompt)return;
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(choice=>{
-    if(choice.outcome==='accepted'){
-      closeOv('ov-pwa');
-      const btn=document.getElementById('pwa-install-btn');
-      if(btn)btn.style.display='none';
-    }
-    deferredPrompt=null;
-  });
+// Service Worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-// Show install button if iOS and not standalone
-document.addEventListener('DOMContentLoaded',()=>{
-  if(detectPlatform()==='ios'&&!isStandalone()){
-    const btn=document.getElementById('pwa-install-btn');
-    if(btn)btn.style.display='';
-  }
-});
+const cfg=getCfg();
+if(cfg.token)document.getElementById('bot-token').value=cfg.token;
+if(cfg.chatId)document.getElementById('chat-id').value=cfg.chatId;
+renderAll();
 </script>
-<!-- PWA INSTALL MODAL -->
-<div class="overlay" id="ov-pwa" onclick="if(event.target===this)closeOv('ov-pwa')">
-  <div class="modal" style="max-width:340px" onclick="event.stopPropagation()">
-    <div class="modal-handle"></div>
-    <h3>📲 ติดตั้งแอปบนมือถือ</h3>
-    <div id="pwa-ios-guide">
-      <div style="background:var(--info-bg);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--info-txt);line-height:1.6">
-        ใช้งานได้เหมือนแอปจริง ไม่ต้องเปิด Browser และทำงานได้แม้ไม่มีสัญญาณอินเทอร์เน็ต
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">🍎 iPhone / iPad (Safari)</div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">1</div>
-          <div style="font-size:13px">กดปุ่ม <b>Share</b> <span style="font-size:16px">⬆️</span> ที่แถบล่างของ Safari</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">2</div>
-          <div style="font-size:13px">เลื่อนลงแล้วกด <b>"Add to Home Screen"</b> <span style="font-size:14px">➕</span></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">3</div>
-          <div style="font-size:13px">กด <b>"Add"</b> มุมขวาบน แล้วแอปจะปรากฏบน Home Screen</div>
-        </div>
-      </div>
-      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.04em">🤖 Android (Chrome)</div>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">1</div>
-          <div style="font-size:13px">กดเมนู <b>⋮</b> มุมขวาบนของ Chrome</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">2</div>
-          <div style="font-size:13px">เลือก <b>"Add to Home screen"</b> หรือ <b>"ติดตั้งแอป"</b></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;background:var(--bg);border-radius:var(--r-sm);padding:10px 12px">
-          <div style="width:32px;height:32px;background:#4285F4;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-weight:700">3</div>
-          <div style="font-size:13px">กด <b>"ติดตั้ง"</b> เพื่อยืนยัน</div>
-        </div>
-      </div>
-      <div style="font-size:11.5px;color:var(--text3);text-align:center;line-height:1.6;background:var(--bg);padding:8px 12px;border-radius:var(--r-sm)">
-        ⚠️ ต้องเปิดผ่าน <b>HTTPS</b> เท่านั้น จึงจะติดตั้งได้<br>หากเปิดจาก <code>file://</code> จะไม่สามารถติดตั้งได้
-      </div>
-    </div>
-    <div class="mbtns" style="margin-top:16px">
-      <button class="btn-ok" id="pwa-android-btn" style="display:none" onclick="triggerAndroidInstall()">📲 ติดตั้งเลย</button>
-      <button class="btn-cancel" onclick="closeOv('ov-pwa')">ปิด</button>
-    </div>
-  </div>
-</div>
-<!-- FIREBASE SETUP SCREEN -->
-<div id="fb-setup-screen">
-  <div class="fb-setup-card">
-    <h2>🔥 ตั้งค่า Firebase Real-time</h2>
-    <p>ระบบนี้ใช้ Firebase Realtime Database เพื่อให้ข้อมูลอัพเดทแบบ Real-time ระหว่างทุกอุปกรณ์ กรุณาสร้างโปรเจกต์ Firebase และกรอกข้อมูลด้านล่าง</p>
-    <div class="fb-setup-steps">
-      <b>วิธีสร้าง Firebase (ฟรี):</b><br>
-      1. ไปที่ <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
-      2. กด <b>"Add project"</b> → ตั้งชื่อ → สร้างโปรเจกต์<br>
-      3. ไปที่ <b>Build → Realtime Database → Create database</b><br>
-      4. เลือก <b>"Start in test mode"</b> (อนุญาตอ่าน/เขียนได้ 30 วัน)<br>
-      5. คัดลอก URL ของ Database เช่น <code>https://xxx-default-rtdb.asia-southeast1.firebasedatabase.app</code><br>
-      6. วางใน <b>Database URL</b> ด้านล่าง แล้วกด <b>"เชื่อมต่อ"</b>
-    </div>
-    <div class="field">
-      <label>Database URL *</label>
-      <input id="fb-url-inp" placeholder="https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app" autocomplete="off" spellcheck="false">
-    </div>
-    <div class="field">
-      <label>Prefix ชื่อข้อมูล (ใช้เมื่อแชร์ DB กับหลายทีม — ไม่บังคับ)</label>
-      <input id="fb-prefix-inp" placeholder="เช่น factory1 หรือ ปล่อยว่างไว้">
-    </div>
-    <div id="fb-connect-err"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn-cancel" id="fb-skip-btn" onclick="skipFirebase()" style="height:40px;padding:0 16px;border:1.5px solid var(--border);border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;cursor:pointer;background:none;color:var(--text2)">ใช้แบบ Local (ไม่ sync)</button>
-      <button class="btn-ok" onclick="connectFirebase()" style="height:40px;padding:0 16px;background:var(--brand);color:#fff;border:none;border-radius:var(--r-sm);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;cursor:pointer">🔥 เชื่อมต่อ Firebase</button>
-    </div>
-  </div>
-</div>
-
 </body>
-
-  
+</html>
