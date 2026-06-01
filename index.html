@@ -145,6 +145,24 @@
   /* ios guide */
   .ios-guide{background:var(--p1);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--pt);line-height:1.8}
 
+  /* schedule list */
+  .sched-list{display:flex;flex-direction:column;gap:8px;margin-bottom:.75rem}
+  .sched-item{display:flex;align-items:center;gap:8px;background:#fafaf9;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.6rem .8rem;flex-wrap:wrap}
+  .sched-item.s-on{border-left:4px solid var(--p3)}
+  .sched-item.s-off{opacity:.55}
+  .sched-time-label{font-size:15px;font-weight:700;color:var(--pt);font-family:monospace;min-width:52px}
+  .sched-days{display:flex;gap:3px;flex:1;flex-wrap:wrap}
+  .sched-day{width:26px;height:26px;border-radius:50%;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;background:var(--p1);color:var(--text2)}
+  .sched-day.on{background:var(--pt);color:#fff}
+  .sched-del{background:none;border:none;cursor:pointer;font-size:16px;color:var(--text3);padding:2px 4px;border-radius:6px;line-height:1;flex-shrink:0}
+  .sched-del:active{background:var(--r1);color:var(--rt)}
+  .sched-toggle{flex-shrink:0}
+
+  /* day picker in add form */
+  .day-picker{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+  .day-btn{width:34px;height:34px;border-radius:50%;font-size:12px;font-weight:600;border:1.5px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.12s;flex-shrink:0}
+  .day-btn.selected{background:var(--pt);color:#fff;border-color:var(--pt)}
+
   /* alarm overlay */
   .alarm-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(30,20,70,.82);align-items:center;justify-content:center;flex-direction:column;gap:18px}
   .alarm-overlay.show{display:flex}
@@ -229,23 +247,41 @@
 <!-- NOTIFY PAGE -->
 <div class="page" id="page-notify">
   <div class="card">
-    <div class="card-title">🕐 แจ้งเตือนอัตโนมัติ</div>
-    <div class="auto-row">
-      <span class="auto-label">⏰ ส่งแจ้งเตือนทุกวันเวลา</span>
-      <div class="time-pick">
-        <select id="auto-time-h" aria-label="ชั่วโมง"></select>
-        <span class="sep">:</span>
-        <select id="auto-time-m" aria-label="นาที"></select>
+    <div class="card-title">🕐 ตารางแจ้งเตือนอัตโนมัติ</div>
+
+    <!-- Schedule list -->
+    <div class="sched-list" id="sched-list"></div>
+
+    <!-- Add new schedule -->
+    <div style="background:var(--p1);border-radius:var(--radius-sm);padding:.8rem .9rem;margin-bottom:.75rem">
+      <div style="font-size:12px;font-weight:600;color:var(--pt);margin-bottom:8px">➕ เพิ่มช่วงเวลาใหม่</div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="time-pick">
+          <select id="new-sched-h" aria-label="ชั่วโมง"></select>
+          <span class="sep">:</span>
+          <select id="new-sched-m" aria-label="นาที"></select>
+        </div>
+        <button class="btn btn-primary" onclick="addSchedule()" style="flex-shrink:0">เพิ่ม</button>
       </div>
-      <label class="toggle" aria-label="เปิด/ปิด"><input type="checkbox" id="auto-toggle" onchange="toggleAuto()"><span class="slider"></span></label>
+      <div class="field-label" style="margin-top:8px;margin-bottom:4px">วันที่ต้องการแจ้งเตือน</div>
+      <div class="day-picker" id="new-sched-days">
+        <button class="day-btn selected" data-d="0">อา</button>
+        <button class="day-btn selected" data-d="1">จ</button>
+        <button class="day-btn selected" data-d="2">อ</button>
+        <button class="day-btn selected" data-d="3">พ</button>
+        <button class="day-btn selected" data-d="4">พฤ</button>
+        <button class="day-btn selected" data-d="5">ศ</button>
+        <button class="day-btn selected" data-d="6">ส</button>
+      </div>
     </div>
+
     <p style="font-size:12px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">⚠️ ต้องเปิดหน้าเว็บ/แอปค้างไว้ เพื่อให้ระบบส่งได้ตามเวลา</p>
     <div class="btn-row">
       <button class="btn btn-tg" id="send-btn" onclick="sendNow()">✈️ ส่งแจ้งเตือนตอนนี้</button>
       <button class="btn btn-ghost" onclick="previewMsg()">👁 ดูตัวอย่าง</button>
     </div>
     <div style="margin-top:8px">
-      <button class="btn btn-ghost" onclick="startAlarm(getTimePicker('auto-time-h','auto-time-m'),'ทดสอบเสียงปลุก — กดหยุดเพื่อปิด')" style="font-size:13px;width:100%;justify-content:center">🔔 ทดสอบเสียงปลุก</button>
+      <button class="btn btn-ghost" onclick="startAlarm(getTimePicker('new-sched-h','new-sched-m'),'ทดสอบเสียงปลุก — กดหยุดเพื่อปิด')" style="font-size:13px;width:100%;justify-content:center">🔔 ทดสอบเสียงปลุก</button>
     </div>
     <div class="log" id="send-log"></div>
     <div class="preview-box" id="preview-box">
@@ -396,7 +432,7 @@ function showPage(name){
   document.getElementById('page-'+name).classList.add('active');
   const idx={tasks:0,notify:1,settings:2}[name];
   document.querySelectorAll('.tab')[idx].classList.add('active');
-  if(name==='notify')renderWeek();
+  if(name==='notify'){renderWeek();renderSchedules()}
 }
 
 function changeDay(n){
@@ -527,22 +563,71 @@ async function sendNow(){
   }catch{setLog('send-log','เกิดข้อผิดพลาด ตรวจสอบการเชื่อมต่อ','err')}
   btn.disabled=false;btn.innerHTML='✈️ ส่งแจ้งเตือนตอนนี้';
 }
-function toggleAuto(){
-  const on=document.getElementById('auto-toggle').checked;
-  clearInterval(autoTimer);
-  if(on){checkAutoSend();autoTimer=setInterval(checkAutoSend,30000)}
+// ---- Multi-schedule system ----
+const SCHED_KEY='tg_schedules_v1';
+const DAY_NAMES=['อา','จ','อ','พ','พฤ','ศ','ส'];
+
+function getSchedules(){try{return JSON.parse(localStorage.getItem(SCHED_KEY)||'[]')}catch{return[]}}
+function saveSchedules(s){localStorage.setItem(SCHED_KEY,JSON.stringify(s))}
+
+function addSchedule(){
+  const time=getTimePicker('new-sched-h','new-sched-m');
+  const days=[...document.querySelectorAll('#new-sched-days .day-btn.selected')].map(b=>parseInt(b.dataset.d));
+  if(!days.length){setLog('send-log','กรุณาเลือกอย่างน้อย 1 วัน','warn');return}
+  const scheds=getSchedules();
+  if(scheds.find(s=>s.time===time)){setLog('send-log','มีเวลานี้อยู่แล้ว','warn');return}
+  scheds.push({id:Date.now(),time,days,enabled:true});
+  scheds.sort((a,b)=>a.time.localeCompare(b.time));
+  saveSchedules(scheds);
+  renderSchedules();
+  setLog('send-log','เพิ่มการแจ้งเตือน '+time+' แล้ว ✓','ok');
 }
+
+function deleteSchedule(id){
+  saveSchedules(getSchedules().filter(s=>s.id!==id));
+  renderSchedules();
+}
+
+function toggleSchedule(id){
+  const s=getSchedules().map(x=>x.id===id?{...x,enabled:!x.enabled}:x);
+  saveSchedules(s);renderSchedules();
+}
+
+function renderSchedules(){
+  const list=document.getElementById('sched-list');
+  const scheds=getSchedules();
+  if(!scheds.length){
+    list.innerHTML='<div style="text-align:center;padding:1rem;color:var(--text3);font-size:13px">ยังไม่มีช่วงเวลาแจ้งเตือน<br>เพิ่มด้านล่างได้เลย</div>';
+    return;
+  }
+  list.innerHTML=scheds.map(s=>{
+    const dayBadges=DAY_NAMES.map((n,i)=>`<span class="sched-day ${s.days.includes(i)?'on':''}">${n}</span>`).join('');
+    return`<div class="sched-item ${s.enabled?'s-on':'s-off'}">
+      <span class="sched-time-label">${s.time}</span>
+      <div class="sched-days">${dayBadges}</div>
+      <label class="toggle sched-toggle" aria-label="เปิด/ปิด"><input type="checkbox" ${s.enabled?'checked':''} onchange="toggleSchedule(${s.id})"><span class="slider"></span></label>
+      <button class="sched-del" onclick="deleteSchedule(${s.id})" aria-label="ลบ">✕</button>
+    </div>`;
+  }).join('');
+}
+
 function checkAutoSend(){
-  const target=getTimePicker('auto-time-h','auto-time-m');
+  const scheds=getSchedules().filter(s=>s.enabled);
+  if(!scheds.length)return;
   const now=new Date();
   const curr=pad(now.getHours())+':'+pad(now.getMinutes());
-  const key='tg_sent_'+todayStr();
-  if(curr===target&&!localStorage.getItem(key)){
-    localStorage.setItem(key,'1');
-    const sendDate=todayStr(); // บันทึกวันที่ก่อน เพื่อส่งใน async
-    startAlarm(curr,'กำลังส่งรายการงานวันนี้ไปยัง Telegram...');
-    sendNowForDate(sendDate);
-  }
+  const todayDow=now.getDay();
+  const today=todayStr();
+  scheds.forEach(s=>{
+    if(s.time===curr&&s.days.includes(todayDow)){
+      const key='tg_sent_'+today+'_'+s.time.replace(':','');
+      if(!localStorage.getItem(key)){
+        localStorage.setItem(key,'1');
+        startAlarm(curr,'กำลังส่งรายการงานวันนี้ไปยัง Telegram...');
+        sendNowForDate(today);
+      }
+    }
+  });
 }
 function clearOldData(){
   const data=getData();const today=new Date(todayStr());let count=0;
@@ -579,9 +664,19 @@ const cfg=getCfg();
 if(cfg.token)document.getElementById('bot-token').value=cfg.token;
 if(cfg.chatId)document.getElementById('chat-id').value=cfg.chatId;
 buildTimePicker('task-time-h','task-time-m','09:00');
-buildTimePicker('auto-time-h','auto-time-m','08:00');
+buildTimePicker('new-sched-h','new-sched-m','08:00');
+
+// day picker toggle
+document.querySelectorAll('#new-sched-days .day-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>btn.classList.toggle('selected'));
+});
+
+// start auto-check every 30s
+autoTimer=setInterval(checkAutoSend,30000);
+checkAutoSend();
+
+renderSchedules();
 renderAll();
 </script>
 </body>
 </html>
-
