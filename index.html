@@ -143,6 +143,18 @@
   /* ios guide */
   .ios-guide{background:var(--p1);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:13px;color:var(--pt);line-height:1.8}
 
+  /* alarm overlay */
+  .alarm-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(30,20,70,.82);align-items:center;justify-content:center;flex-direction:column;gap:18px}
+  .alarm-overlay.show{display:flex}
+  .alarm-box{background:#fff;border-radius:22px;padding:2rem 2.2rem;text-align:center;max-width:300px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.35)}
+  .alarm-ring{font-size:52px;animation:ring 0.6s infinite alternate}
+  @keyframes ring{from{transform:rotate(-18deg) scale(1)}to{transform:rotate(18deg) scale(1.12)}}
+  .alarm-title{font-size:18px;font-weight:700;color:var(--pt);margin:10px 0 4px}
+  .alarm-time{font-size:30px;font-weight:800;color:var(--pd);font-variant-numeric:tabular-nums}
+  .alarm-msg{font-size:13px;color:var(--text2);margin:6px 0 18px;line-height:1.5}
+  .btn-stop{background:#F4C0D1;color:var(--rt);font-size:16px;font-weight:700;padding:13px 28px;border-radius:14px;border:none;cursor:pointer;width:100%}
+  .btn-stop:active{transform:scale(.96)}
+
   /* summary stat */
   .stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:.875rem}
   .stat{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:.8rem;text-align:center}
@@ -222,6 +234,9 @@
       <button class="btn btn-tg" id="send-btn" onclick="sendNow()">✈️ ส่งแจ้งเตือนตอนนี้</button>
       <button class="btn btn-ghost" onclick="previewMsg()">👁 ดูตัวอย่าง</button>
     </div>
+    <div style="margin-top:8px">
+      <button class="btn btn-ghost" onclick="startAlarm(document.getElementById('auto-time').value,'ทดสอบเสียงปลุก — กดหยุดเพื่อปิด')" style="font-size:13px;width:100%;justify-content:center">🔔 ทดสอบเสียงปลุก</button>
+    </div>
     <div class="log" id="send-log"></div>
     <div class="preview-box" id="preview-box">
       <div style="font-size:11px;font-weight:600;color:var(--p3);letter-spacing:.05em;text-transform:uppercase;margin-bottom:6px">ตัวอย่างข้อความ</div>
@@ -273,8 +288,55 @@
   </div>
 </div>
 
+<!-- ALARM OVERLAY -->
+<div class="alarm-overlay" id="alarm-overlay">
+  <div class="alarm-box">
+    <div class="alarm-ring">🔔</div>
+    <div class="alarm-title">ถึงเวลาแจ้งเตือนแล้ว!</div>
+    <div class="alarm-time" id="alarm-show-time"></div>
+    <div class="alarm-msg" id="alarm-show-msg">ระบบกำลังส่งข้อความ Telegram ให้คุณ</div>
+    <button class="btn-stop" onclick="stopAlarm()">🛑 หยุดเสียงปลุก</button>
+  </div>
+</div>
+
 <script>
 const DB='task_v3',CFG='tg_v2';
+let alarmAudioCtx=null,alarmInterval=null,alarmRingTimer=null;
+
+function playAlarmSound(){
+  try{
+    if(!alarmAudioCtx)alarmAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const ctx=alarmAudioCtx;
+    // สร้างเสียงกริ่ง 3 โน้ตวนซ้ำ
+    const notes=[880,1046,1318];
+    notes.forEach((freq,i)=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.type='sine';osc.frequency.value=freq;
+      const t=ctx.currentTime+i*0.18;
+      gain.gain.setValueAtTime(0,t);
+      gain.gain.linearRampToValueAtTime(0.32,t+0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+      osc.start(t);osc.stop(t+0.5);
+    });
+  }catch(e){console.warn('alarm audio',e)}
+}
+
+function startAlarm(timeStr,msg){
+  document.getElementById('alarm-show-time').textContent=timeStr;
+  document.getElementById('alarm-show-msg').textContent=msg||'ระบบกำลังส่งข้อความ Telegram ให้คุณ';
+  document.getElementById('alarm-overlay').classList.add('show');
+  // เล่นทันทีแล้ววนลูปทุก 2.5 วิ
+  playAlarmSound();
+  alarmRingTimer=setInterval(playAlarmSound,2500);
+}
+
+function stopAlarm(){
+  clearInterval(alarmRingTimer);alarmRingTimer=null;
+  document.getElementById('alarm-overlay').classList.remove('show');
+  if(alarmAudioCtx){alarmAudioCtx.close().catch(()=>{});alarmAudioCtx=null;}
+}
 let curDate=todayStr(),autoTimer=null,deferredPrompt=null;
 
 function todayStr(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -434,7 +496,14 @@ function checkAutoSend(){
   const now=new Date();
   const curr=pad(now.getHours())+':'+pad(now.getMinutes());
   const key='tg_sent_'+todayStr();
-  if(curr===target&&!localStorage.getItem(key)){localStorage.setItem(key,'1');const s=curDate;curDate=todayStr();sendNow();curDate=s}
+  if(curr===target&&!localStorage.getItem(key)){
+    localStorage.setItem(key,'1');
+    const s=curDate;curDate=todayStr();
+    // ส่ง Telegram พร้อมกับเปิดเสียงปลุก
+    startAlarm(curr,'กำลังส่งรายการงานวันนี้ไปยัง Telegram...');
+    sendNow();
+    curDate=s;
+  }
 }
 function clearOldData(){
   const data=getData();const today=new Date(todayStr());let count=0;
@@ -474,4 +543,3 @@ renderAll();
 </script>
 </body>
 </html>
-
