@@ -65,7 +65,9 @@
     transition:border .15s,box-shadow .15s;font-family:inherit
   }
   input:focus,select:focus{border-color:var(--p3);box-shadow:0 0 0 3px var(--p1)}
-  input[type=time]{width:auto;min-width:100px}
+  .time-pick{display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
+  .time-pick select{width:auto;padding:10px 6px;min-width:0;font-weight:600;font-family:monospace;font-size:15px;text-align:center}
+  .time-pick .sep{font-size:17px;font-weight:700;color:var(--pt);line-height:1;padding-bottom:1px}
 
   /* buttons */
   .btn{padding:10px 16px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap}
@@ -87,7 +89,7 @@
 
   /* task add */
   .task-add-row{display:flex;gap:6px;margin-bottom:8px}
-  .task-add-row input[type=time]{width:100px;flex-shrink:0}
+
   .task-add-row input[type=text]{flex:1}
   .add-bottom{display:flex;gap:6px}
   .add-bottom select{flex:1}
@@ -203,7 +205,11 @@
     </div>
     <div class="card-title">➕ เพิ่มงานใหม่</div>
     <div class="task-add-row">
-      <input type="time" id="task-time" value="09:00">
+      <div class="time-pick" id="task-time-pick">
+        <select id="task-time-h" aria-label="ชั่วโมง"></select>
+        <span class="sep">:</span>
+        <select id="task-time-m" aria-label="นาที"></select>
+      </div>
       <input type="text" id="task-text" placeholder="ชื่องาน / รายละเอียด..." onkeydown="if(event.key==='Enter')addTask()">
     </div>
     <div class="add-bottom">
@@ -226,7 +232,11 @@
     <div class="card-title">🕐 แจ้งเตือนอัตโนมัติ</div>
     <div class="auto-row">
       <span class="auto-label">⏰ ส่งแจ้งเตือนทุกวันเวลา</span>
-      <input type="time" class="auto-time" id="auto-time" value="08:00">
+      <div class="time-pick">
+        <select id="auto-time-h" aria-label="ชั่วโมง"></select>
+        <span class="sep">:</span>
+        <select id="auto-time-m" aria-label="นาที"></select>
+      </div>
       <label class="toggle" aria-label="เปิด/ปิด"><input type="checkbox" id="auto-toggle" onchange="toggleAuto()"><span class="slider"></span></label>
     </div>
     <p style="font-size:12px;color:var(--text2);margin-bottom:.75rem;line-height:1.6">⚠️ ต้องเปิดหน้าเว็บ/แอปค้างไว้ เพื่อให้ระบบส่งได้ตามเวลา</p>
@@ -235,7 +245,7 @@
       <button class="btn btn-ghost" onclick="previewMsg()">👁 ดูตัวอย่าง</button>
     </div>
     <div style="margin-top:8px">
-      <button class="btn btn-ghost" onclick="startAlarm(document.getElementById('auto-time').value,'ทดสอบเสียงปลุก — กดหยุดเพื่อปิด')" style="font-size:13px;width:100%;justify-content:center">🔔 ทดสอบเสียงปลุก</button>
+      <button class="btn btn-ghost" onclick="startAlarm(getTimePicker('auto-time-h','auto-time-m'),'ทดสอบเสียงปลุก — กดหยุดเพื่อปิด')" style="font-size:13px;width:100%;justify-content:center">🔔 ทดสอบเสียงปลุก</button>
     </div>
     <div class="log" id="send-log"></div>
     <div class="preview-box" id="preview-box">
@@ -302,6 +312,18 @@
 <script>
 const DB='task_v3',CFG='tg_v2';
 let alarmAudioCtx=null,alarmInterval=null,alarmRingTimer=null;
+
+// ---- Time picker helpers ----
+function buildTimePicker(hId,mId,defaultVal){
+  const hSel=document.getElementById(hId);
+  const mSel=document.getElementById(mId);
+  const [dh,dm]=(defaultVal||'09:00').split(':');
+  for(let i=0;i<24;i++){const o=document.createElement('option');o.value=String(i).padStart(2,'0');o.textContent=String(i).padStart(2,'0');if(String(i).padStart(2,'0')===dh)o.selected=true;hSel.appendChild(o)}
+  for(let i=0;i<60;i+=5){const o=document.createElement('option');o.value=String(i).padStart(2,'0');o.textContent=String(i).padStart(2,'0');if(String(i).padStart(2,'0')===dm)o.selected=true;mSel.appendChild(o)}
+}
+function getTimePicker(hId,mId){
+  return document.getElementById(hId).value+':'+document.getElementById(mId).value;
+}
 
 function playAlarmSound(){
   try{
@@ -396,7 +418,7 @@ function renderTasks(){
   }).join('');
 }
 function addTask(){
-  const time=document.getElementById('task-time').value;
+  const time=getTimePicker('task-time-h','task-time-m');
   const text=document.getElementById('task-text').value.trim();
   const priority=document.getElementById('task-priority').value;
   if(!text){document.getElementById('task-text').focus();return}
@@ -492,7 +514,7 @@ function toggleAuto(){
   if(on){checkAutoSend();autoTimer=setInterval(checkAutoSend,30000)}
 }
 function checkAutoSend(){
-  const target=document.getElementById('auto-time').value;
+  const target=getTimePicker('auto-time-h','auto-time-m');
   const now=new Date();
   const curr=pad(now.getHours())+':'+pad(now.getMinutes());
   const key='tg_sent_'+todayStr();
@@ -539,8 +561,9 @@ if('serviceWorker' in navigator){
 const cfg=getCfg();
 if(cfg.token)document.getElementById('bot-token').value=cfg.token;
 if(cfg.chatId)document.getElementById('chat-id').value=cfg.chatId;
+buildTimePicker('task-time-h','task-time-m','09:00');
+buildTimePicker('auto-time-h','auto-time-m','08:00');
 renderAll();
 </script>
 </body>
 </html>
-
