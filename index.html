@@ -327,21 +327,27 @@ function getTimePicker(hId,mId){
 
 function playAlarmSound(){
   try{
-    if(!alarmAudioCtx)alarmAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    const ctx=alarmAudioCtx;
-    // สร้างเสียงกริ่ง 3 โน้ตวนซ้ำ
-    const notes=[880,1046,1318];
-    notes.forEach((freq,i)=>{
-      const osc=ctx.createOscillator();
-      const gain=ctx.createGain();
-      osc.connect(gain);gain.connect(ctx.destination);
-      osc.type='sine';osc.frequency.value=freq;
-      const t=ctx.currentTime+i*0.18;
-      gain.gain.setValueAtTime(0,t);
-      gain.gain.linearRampToValueAtTime(0.32,t+0.05);
-      gain.gain.exponentialRampToValueAtTime(0.001,t+0.45);
-      osc.start(t);osc.stop(t+0.5);
-    });
+    // สร้าง AudioContext ใหม่ทุกครั้งเพื่อหลีกเลี่ยงปัญหา suspended/closed state
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    alarmAudioCtx=ctx;
+    // resume ในกรณีที่ browser suspend auto
+    const doPlay=()=>{
+      const notes=[880,1046,1318];
+      notes.forEach((freq,i)=>{
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        osc.connect(gain);gain.connect(ctx.destination);
+        osc.type='sine';osc.frequency.value=freq;
+        const t=ctx.currentTime+i*0.18;
+        gain.gain.setValueAtTime(0,t);
+        gain.gain.linearRampToValueAtTime(0.32,t+0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001,t+0.45);
+        osc.start(t);osc.stop(t+0.5);
+        osc.onended=()=>{try{ctx.close()}catch(e){}};
+      });
+    };
+    if(ctx.state==='suspended'){ctx.resume().then(doPlay).catch(e=>console.warn('alarm resume',e))}
+    else{doPlay()}
   }catch(e){console.warn('alarm audio',e)}
 }
 
@@ -357,7 +363,8 @@ function startAlarm(timeStr,msg){
 function stopAlarm(){
   clearInterval(alarmRingTimer);alarmRingTimer=null;
   document.getElementById('alarm-overlay').classList.remove('show');
-  if(alarmAudioCtx){alarmAudioCtx.close().catch(()=>{});alarmAudioCtx=null;}
+  // ปิด AudioContext ที่ค้างอยู่ (ถ้ามี)
+  if(alarmAudioCtx){try{alarmAudioCtx.close()}catch(e){}alarmAudioCtx=null;}
 }
 let curDate=todayStr(),autoTimer=null,deferredPrompt=null;
 
@@ -493,6 +500,18 @@ function previewMsg(){
   const pb=document.getElementById('preview-box');
   pb.style.display=pb.style.display==='block'?'none':'block';
 }
+async function sendNowForDate(dateStr){
+  const cfg=getCfg();
+  if(!cfg.token||!cfg.chatId){setLog('send-log','ยังไม่ได้บันทึกการตั้งค่า Telegram','err');return}
+  try{
+    const res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:cfg.chatId,text:buildMsg(dateStr),parse_mode:'Markdown'})
+    });
+    const data=await res.json();
+    data.ok?setLog('send-log','ส่ง Telegram สำเร็จ ✓','ok'):setLog('send-log','ส่งไม่สำเร็จ: '+data.description,'err');
+  }catch{setLog('send-log','เกิดข้อผิดพลาด ตรวจสอบการเชื่อมต่อ','err')}
+}
 async function sendNow(){
   const cfg=getCfg();
   if(!cfg.token||!cfg.chatId){setLog('send-log','ยังไม่ได้บันทึกการตั้งค่า Telegram','err');return}
@@ -520,11 +539,9 @@ function checkAutoSend(){
   const key='tg_sent_'+todayStr();
   if(curr===target&&!localStorage.getItem(key)){
     localStorage.setItem(key,'1');
-    const s=curDate;curDate=todayStr();
-    // ส่ง Telegram พร้อมกับเปิดเสียงปลุก
+    const sendDate=todayStr(); // บันทึกวันที่ก่อน เพื่อส่งใน async
     startAlarm(curr,'กำลังส่งรายการงานวันนี้ไปยัง Telegram...');
-    sendNow();
-    curDate=s;
+    sendNowForDate(sendDate);
   }
 }
 function clearOldData(){
@@ -567,4 +584,3 @@ renderAll();
 </script>
 </body>
 </html>
-
