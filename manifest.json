@@ -1,12 +1,13 @@
 {
-  "name": "Daily Task Reminder",
-  "short_name": "Task Reminder",
-  "description": "แอปแจ้งเตือนงานรายวันผ่าน Telegram Bot",
-  "start_url": "/index.html",
+  "name": "ToolTrack — ระบบติดตามเครื่องมือ",
+  "short_name": "ToolTrack",
+  "description": "ระบบติดตามการเบิก-คืนเครื่องมือ",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#F7F5FF",
-  "theme_color": "#3C3489",
   "orientation": "portrait",
+  "background_color": "#0D1117",
+  "theme_color": "#0D1117",
   "lang": "th",
   "icons": [
     {
