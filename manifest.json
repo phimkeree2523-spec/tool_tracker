@@ -1,7 +1,7 @@
 {
-  "name": "ToolTrack — ระบบติดตามเครื่องมือ",
+  "name": "ToolTrack — ติดตามอุปกรณ์ช่าง",
   "short_name": "ToolTrack",
-  "description": "ระบบติดตามการเบิก-คืนเครื่องมือ",
+  "description": "ระบบติดตามอุปกรณ์ช่างไฟฟ้า เก็บข้อมูลในเครื่อง",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -14,13 +14,19 @@
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

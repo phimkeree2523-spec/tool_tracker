@@ -3,356 +3,592 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>⚡ ToolTrack — พนักงาน</title>
+<title>⚡ ToolTrack — ติดตามอุปกรณ์ช่าง</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ToolTrack">
 <meta name="theme-color" content="#0D1117">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
+/* ── TOKENS ─────────────────────────────────────────────── */
 :root {
-  --bg:#0D1117; --surface:#161B22; --surface2:#1C2333;
-  --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
-  --orange:#F77F00; --orange2:#FFAA40;
-  --green:#3DD68C; --green2:#22C55E;
-  --red:#F85149; --yellow:#F0C040; --blue:#58A6FF;
-  --text:#E6EDF3; --muted:#7D8590; --muted2:#B1BAC4;
-  --r:14px; --r-sm:10px;
-  --font-th:'IBM Plex Sans Thai',sans-serif;
-  --font-en:'Space Grotesk',sans-serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html{scroll-behavior:smooth;}
-body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-height:100dvh;padding-bottom:72px;overscroll-behavior:none;}
-::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-track{background:transparent;}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+  --bg:       #0D1117;
+  --surface:  #161B22;
+  --surface2: #1C2333;
+  --border:   rgba(255,255,255,0.08);
+  --border2:  rgba(255,255,255,0.14);
 
-/* ── LOGIN SCREEN ── */
-#login-screen{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg);display:flex;flex-direction:column;
-  align-items:center;justify-content:center;padding:32px 24px;
-}
-.login-logo{
-  width:72px;height:72px;border-radius:20px;
-  background:linear-gradient(135deg,var(--orange),#FF4500);
-  display:flex;align-items:center;justify-content:center;
-  font-size:36px;margin-bottom:24px;
-  box-shadow:0 0 32px rgba(247,127,0,.4);
-}
-.login-title{font-family:var(--font-en);font-size:26px;font-weight:700;color:var(--text);margin-bottom:4px;}
-.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;text-align:center;}
-.login-card{
-  width:100%;max-width:360px;
-  background:var(--surface);border:1px solid var(--border2);
-  border-radius:var(--r);padding:20px;
-}
-.login-label{font-size:12px;font-weight:700;color:var(--muted2);margin-bottom:6px;display:block;letter-spacing:.4px;}
-.login-input{
-  width:100%;padding:13px 14px;
-  background:var(--surface2);border:1.5px solid var(--border);
-  border-radius:var(--r-sm);font-family:var(--font-th);font-size:15px;color:var(--text);
-  outline:none;transition:border .2s;margin-bottom:14px;
-}
-.login-input:focus{border-color:var(--orange);}
-.login-input::placeholder{color:var(--muted);}
-.btn-login{
-  width:100%;padding:14px;background:var(--orange);color:#fff;
-  border:none;border-radius:var(--r);font-family:var(--font-th);font-size:15px;font-weight:700;
-  cursor:pointer;box-shadow:0 4px 20px rgba(247,127,0,.35);transition:background .2s;
-}
-.btn-login:hover{background:#e07000;}
+  --orange:   #F77F00;
+  --orange2:  #FFAA40;
+  --green:    #3DD68C;
+  --green2:   #22C55E;
+  --red:      #F85149;
+  --yellow:   #F0C040;
+  --blue:     #58A6FF;
 
-/* ── NAV ── */
-.nav{
-  background:rgba(13,17,23,0.85);backdrop-filter:blur(20px) saturate(1.4);
+  --text:     #E6EDF3;
+  --muted:    #7D8590;
+  --muted2:   #B1BAC4;
+
+  --r:        14px;
+  --r-sm:     10px;
+  --shadow:   0 0 0 1px var(--border), 0 8px 32px rgba(0,0,0,0.4);
+  --font-th:  'IBM Plex Sans Thai', sans-serif;
+  --font-en:  'Space Grotesk', sans-serif;
+}
+
+/* ── RESET ───────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html { scroll-behavior:smooth; }
+body { font-family:var(--font-th); background:var(--bg); color:var(--text); min-height:100dvh; padding-bottom:72px; overscroll-behavior:none; }
+
+/* ── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* ── NAV ─────────────────────────────────────────────────── */
+.nav {
+  background:rgba(13,17,23,0.85);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
   border-bottom:1px solid var(--border);
-  padding:12px 16px 10px;position:sticky;top:0;z-index:200;
-  display:flex;align-items:center;gap:10px;
+  padding:12px 16px 10px;
+  position:sticky; top:0; z-index:200;
+  display:flex; align-items:center; gap:10px;
 }
-.nav-logo{
-  width:34px;height:34px;border-radius:9px;
+.nav-logo {
+  width:34px; height:34px; border-radius:9px;
   background:linear-gradient(135deg,var(--orange),#FF4500);
-  display:flex;align-items:center;justify-content:center;
-  font-size:17px;flex-shrink:0;box-shadow:0 0 12px rgba(247,127,0,.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0; box-shadow:0 0 12px rgba(247,127,0,.4);
 }
-.nav-title{font-family:var(--font-en);font-size:16px;font-weight:700;color:var(--text);flex:1;letter-spacing:-.2px;}
-.nav-badges{display:flex;gap:6px;align-items:center;}
-.nav-pill{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;border:1px solid;line-height:1.5;}
-.pill-in{color:var(--green);border-color:rgba(61,214,140,.3);background:rgba(61,214,140,.08);}
-.pill-out{color:var(--orange);border-color:rgba(247,127,0,.3);background:rgba(247,127,0,.08);}
-#sync-ring{width:8px;height:8px;border-radius:50%;background:var(--green);opacity:0;transition:opacity .4s;box-shadow:0 0 6px var(--green);}
-#sync-ring.pulse{opacity:1;}
+.nav-title { font-family:var(--font-en); font-size:16px; font-weight:700; color:var(--text); flex:1; letter-spacing:-.2px; }
+.nav-badges { display:flex; gap:6px; align-items:center; }
+.nav-pill {
+  font-size:11px; font-weight:600; padding:3px 9px;
+  border-radius:20px; border:1px solid; line-height:1.5;
+}
+.pill-in  { color:var(--green);  border-color:rgba(61,214,140,.3);  background:rgba(61,214,140,.08); }
+.pill-out { color:var(--orange); border-color:rgba(247,127,0,.3); background:rgba(247,127,0,.08); }
+#sync-ring {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--green); opacity:0;
+  transition:opacity .4s; box-shadow:0 0 6px var(--green);
+}
+#sync-ring.pulse { opacity:1; }
 
-/* ── WHO BANNER ── */
-#who-banner{
-  background:linear-gradient(90deg,rgba(247,127,0,.12),transparent);
-  border-bottom:1px solid rgba(247,127,0,.18);
-  padding:8px 16px;display:flex;align-items:center;gap:8px;
-  font-size:12px;color:var(--muted2);
-}
-#who-banner b{color:var(--orange2);}
-.btn-change-who{
-  margin-left:auto;padding:4px 10px;background:var(--surface2);
-  border:1px solid var(--border2);border-radius:20px;
-  font-size:11px;font-weight:600;color:var(--muted2);cursor:pointer;
-}
-
-/* ── TAB BAR ── */
-.tabbar{
-  display:flex;gap:0;padding:0 8px;
-  background:rgba(13,17,23,.95);backdrop-filter:blur(12px);
+/* ── TAB BAR ─────────────────────────────────────────────── */
+.tabbar {
+  display:flex; gap:0; padding:0 8px;
+  background:rgba(13,17,23,0.95);
+  backdrop-filter:blur(12px);
   border-bottom:1px solid var(--border);
-  position:sticky;top:56px;z-index:100;
-  overflow-x:auto;scrollbar-width:none;
+  position:sticky; top:56px; z-index:100;
+  overflow-x:auto; scrollbar-width:none;
 }
-.tabbar::-webkit-scrollbar{display:none;}
-.tab{
-  flex:1;min-width:64px;padding:10px 4px 9px;
-  background:none;border:none;font-family:var(--font-th);font-size:11px;font-weight:600;
-  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;
-  transition:color .2s,border-color .2s;white-space:nowrap;
-  display:flex;flex-direction:column;align-items:center;gap:3px;
+.tabbar::-webkit-scrollbar { display:none; }
+.tab {
+  flex:1; min-width:64px;
+  padding:10px 4px 9px;
+  background:none; border:none;
+  font-family:var(--font-th); font-size:11px; font-weight:600;
+  color:var(--muted); cursor:pointer;
+  border-bottom:2px solid transparent;
+  transition:color .2s, border-color .2s;
+  white-space:nowrap; display:flex; flex-direction:column; align-items:center; gap:3px;
 }
-.tab .tab-ico{font-size:16px;line-height:1;}
-.tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.tab .tab-ico { font-size:16px; line-height:1; }
+.tab.active { color:var(--orange); border-bottom-color:var(--orange); }
 
-/* ── PAGES ── */
-.page{display:none;padding:12px 12px 8px;animation:fadeSlide .2s ease;}
-.page.active{display:block;}
-@keyframes fadeSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ── CONTENT ─────────────────────────────────────────────── */
+.page { display:none; padding:12px 12px 8px; animation:fadeSlide .2s ease; }
+.page.active { display:block; }
+@keyframes fadeSlide { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
 
-/* ── SEARCH / FILTER ── */
-.search-row{display:flex;gap:8px;margin-bottom:10px;}
-.search-wrap{flex:1;position:relative;}
-.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;color:var(--muted);}
-.search-input{
-  width:100%;padding:9px 10px 9px 34px;
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r-sm);font-family:var(--font-th);font-size:13px;color:var(--text);
-  outline:none;transition:border .2s;
+/* ── SEARCH BAR ──────────────────────────────────────────── */
+.search-row { display:flex; gap:8px; margin-bottom:10px; }
+.search-wrap { flex:1; position:relative; }
+.search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; color:var(--muted); }
+.search-input {
+  width:100%; padding:9px 10px 9px 34px;
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-sm); font-family:var(--font-th); font-size:13px; color:var(--text);
+  outline:none; transition:border .2s;
 }
-.search-input:focus{border-color:var(--orange);}
-.search-input::placeholder{color:var(--muted);}
-.filter-chips{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
-.filter-chips::-webkit-scrollbar{display:none;}
-.chip{
-  flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;
-  cursor:pointer;transition:all .15s;background:var(--surface);border:1px solid var(--border);
-  color:var(--muted2);white-space:nowrap;
+.search-input:focus { border-color:var(--orange); }
+.search-input::placeholder { color:var(--muted); }
+.btn-filter {
+  padding:9px 12px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-sm); font-size:16px; cursor:pointer; transition:border .2s;
+  display:flex; align-items:center; gap:4px;
 }
-.chip.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+.btn-filter.active { border-color:var(--orange); color:var(--orange); }
 
-/* ── STAT STRIP ── */
-.stat-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 10px;text-align:center;}
-.stat-num{font-family:var(--font-en);font-size:26px;font-weight:700;line-height:1;}
-.stat-lbl{font-size:10px;font-weight:600;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;}
-.sn-total{color:var(--blue);} .sn-in{color:var(--green);} .sn-out{color:var(--orange);}
+/* ── FILTER CHIPS ────────────────────────────────────────── */
+.filter-chips { display:flex; gap:6px; margin-bottom:10px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+.filter-chips::-webkit-scrollbar { display:none; }
+.chip {
+  flex-shrink:0; padding:5px 12px;
+  border-radius:20px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:all .15s;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted2); white-space:nowrap;
+}
+.chip.active { background:var(--orange); border-color:var(--orange); color:#fff; }
 
-/* ── TOOL CARDS ── */
-.tools-list{display:flex;flex-direction:column;gap:8px;}
-.tool-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--r);overflow:hidden;
-  display:flex;align-items:stretch;transition:border-color .2s,transform .1s;
+/* ── STAT STRIP ──────────────────────────────────────────── */
+.stat-strip { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+.stat-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:12px 10px; text-align:center;
 }
-.tool-card:active{transform:scale(.99);}
-.tool-card.out{border-color:rgba(247,127,0,.25);}
-.card-stripe{width:3px;flex-shrink:0;background:var(--green);}
-.tool-card.out .card-stripe{background:var(--orange);}
-.card-img{
-  width:60px;height:60px;margin:10px 0 10px 10px;
-  border-radius:9px;overflow:hidden;flex-shrink:0;
-  background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:26px;
-}
-.card-img img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
-.card-body{flex:1;padding:10px 8px 10px 10px;min-width:0;}
-.card-name{font-weight:700;font-size:14px;color:var(--text);word-break:break-word;}
-.card-cat{font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px;}
-.card-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin:3px 0;}
-.badge-in{background:rgba(61,214,140,.12);color:var(--green);}
-.badge-out{background:rgba(247,127,0,.12);color:var(--orange);}
-.card-meta{font-size:11px;color:var(--muted2);margin-top:2px;}
-.card-note{font-size:11px;color:var(--muted);margin-top:1px;}
-.card-time{font-size:10px;color:var(--muted);margin-top:4px;}
-.card-cond-img{width:100%;border-radius:6px;margin-top:6px;max-height:80px;object-fit:cover;cursor:zoom-in;display:block;}
-.card-num{display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-en);font-size:11px;font-weight:700;background:rgba(88,166,255,.15);color:var(--blue);border:1px solid rgba(88,166,255,.3);border-radius:6px;padding:1px 7px;margin-left:4px;flex-shrink:0;}
-.card-name-row{display:flex;align-items:center;flex-wrap:wrap;}
-.card-actions{display:flex;flex-direction:column;gap:5px;padding:10px 10px 10px 4px;justify-content:center;flex-shrink:0;}
-.btn-act{border:none;border-radius:8px;padding:7px 9px;font-family:var(--font-th);font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;line-height:1.3;transition:opacity .15s;}
-.btn-act:active{opacity:.7;}
-.btn-out{background:rgba(247,127,0,.15);color:var(--orange);}
-.btn-in{background:rgba(61,214,140,.15);color:var(--green);}
+.stat-num { font-family:var(--font-en); font-size:26px; font-weight:700; line-height:1; }
+.stat-lbl { font-size:10px; font-weight:600; color:var(--muted); margin-top:4px; text-transform:uppercase; letter-spacing:.5px; }
+.sn-total { color:var(--blue); }
+.sn-in    { color:var(--green); }
+.sn-out   { color:var(--orange); }
 
-/* ── EMPTY ── */
-.empty{text-align:center;padding:48px 20px;}
-.empty-ico{font-size:52px;margin-bottom:12px;opacity:.5;}
-.empty-txt{font-size:14px;color:var(--muted);line-height:1.7;}
+/* ── TOOL CARDS ──────────────────────────────────────────── */
+.tools-list { display:flex; flex-direction:column; gap:8px; }
+.tool-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); overflow:hidden;
+  display:flex; align-items:stretch;
+  transition:border-color .2s, transform .1s;
+  position:relative;
+}
+.tool-card:active { transform:scale(.99); }
+.tool-card.out { border-color:rgba(247,127,0,.25); }
+.tool-card.selected { border-color:var(--blue); background:rgba(88,166,255,.05); }
 
-/* ── FORM CARD ── */
-.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 16px;margin-bottom:10px;}
-.form-title{font-family:var(--font-en);font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
-.form-row{margin-bottom:13px;}
-.form-label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:6px;display:flex;align-items:center;gap:4px;}
-.req{color:var(--orange);}
-.form-input,.form-select{
-  width:100%;padding:10px 12px;
-  background:var(--surface2);border:1px solid var(--border);
-  border-radius:var(--r-sm);font-family:var(--font-th);font-size:13px;color:var(--text);
-  outline:none;transition:border .2s;appearance:none;
-}
-.form-input:focus,.form-select:focus{border-color:var(--orange);}
-.form-input::placeholder{color:var(--muted);}
-.form-select option{background:var(--surface2);}
-.select-wrap{position:relative;}
-.select-arrow{position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:12px;color:var(--muted);}
-.upload-area{
-  border:2px dashed var(--border2);border-radius:var(--r);
-  padding:18px;text-align:center;cursor:pointer;
-  background:var(--surface2);transition:border .2s,background .2s;
-  position:relative;overflow:hidden;
-}
-.upload-area:hover,.upload-area.has-img{border-color:var(--orange);border-style:solid;}
-.upload-ico{font-size:28px;margin-bottom:4px;}
-.upload-txt{font-size:12px;color:var(--muted);}
-.upload-preview{max-width:100%;max-height:140px;border-radius:9px;display:none;margin-top:8px;}
-.upload-preview.show{display:block;}
-.num-row{display:flex;gap:8px;align-items:center;}
-.btn-auto-num{flex-shrink:0;padding:10px 12px;background:rgba(88,166,255,.12);color:var(--blue);border:1px solid rgba(88,166,255,.25);border-radius:var(--r-sm);font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-th);transition:background .15s;}
-.num-hint{font-size:11px;color:var(--orange2);margin-top:5px;display:none;align-items:center;gap:4px;}
-.num-hint.show{display:flex;}
-.btn-submit{
-  width:100%;padding:13px;background:var(--orange);color:#fff;
-  border:none;border-radius:var(--r);font-family:var(--font-th);font-size:14px;font-weight:700;
-  cursor:pointer;transition:background .2s;margin-top:4px;
-  display:flex;align-items:center;justify-content:center;gap:6px;
-}
-.btn-submit:hover{background:#e07000;}
+/* status stripe */
+.card-stripe { width:3px; flex-shrink:0; background:var(--green); }
+.tool-card.out .card-stripe { background:var(--orange); }
 
-/* ── OVERLAY SHEET ── */
-.overlay{
-  visibility:hidden;opacity:0;pointer-events:none;
-  position:fixed;inset:0;z-index:9000;
+.card-img {
+  width:60px; height:60px; margin:10px 0 10px 10px;
+  border-radius:9px; overflow:hidden; flex-shrink:0;
+  background:var(--surface2);
+  display:flex; align-items:center; justify-content:center; font-size:26px;
+}
+.card-img img { width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
+
+.card-body { flex:1; padding:10px 8px 10px 10px; min-width:0; }
+.card-name { font-weight:700; font-size:14px; color:var(--text); word-break:break-word; }
+.card-cat { font-size:10px; font-weight:600; color:var(--muted); margin-bottom:4px; }
+.card-badge {
+  display:inline-flex; align-items:center; gap:3px;
+  font-size:10px; font-weight:700; padding:2px 7px;
+  border-radius:20px; margin:3px 0;
+}
+.badge-in  { background:rgba(61,214,140,.12); color:var(--green); }
+.badge-out { background:rgba(247,127,0,.12);  color:var(--orange); }
+.card-meta { font-size:11px; color:var(--muted2); margin-top:2px; }
+.card-note { font-size:11px; color:var(--muted); margin-top:1px; }
+.card-time { font-size:10px; color:var(--muted); margin-top:4px; }
+.card-cond-img { width:100%; border-radius:6px; margin-top:6px; max-height:80px; object-fit:cover; cursor:zoom-in; display:block; }
+
+.card-actions { display:flex; flex-direction:column; gap:5px; padding:10px 10px 10px 4px; justify-content:center; flex-shrink:0; }
+.btn-act {
+  border:none; border-radius:8px; padding:7px 9px;
+  font-family:var(--font-th); font-size:11px; font-weight:700;
+  cursor:pointer; white-space:nowrap; line-height:1.3;
+  transition:opacity .15s;
+}
+.btn-act:active { opacity:.7; }
+.btn-out { background:rgba(247,127,0,.15); color:var(--orange); }
+.btn-in  { background:rgba(61,214,140,.15); color:var(--green); }
+.btn-edit { background:var(--surface2); color:var(--muted2); padding:6px 9px; }
+.btn-del  { background:rgba(248,81,73,.1); color:var(--red); padding:6px 9px; }
+
+/* bulk select checkbox */
+.card-check {
+  width:18px; height:18px; border-radius:5px;
+  border:2px solid var(--border2); background:var(--surface2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11px; flex-shrink:0;
+  position:absolute; top:10px; left:16px;
+  transition:all .15s; cursor:pointer; z-index:1;
+  opacity:0; pointer-events:none;
+}
+.bulk-mode .card-check { opacity:1; pointer-events:auto; }
+.card-check.checked { background:var(--blue); border-color:var(--blue); color:#fff; }
+.bulk-mode .tool-card { padding-left:6px; }
+
+/* ── BULK ACTION BAR ─────────────────────────────────────── */
+#bulk-bar {
+  position:fixed; bottom:72px; left:0; right:0;
+  background:var(--surface2); border-top:1px solid var(--border2);
+  padding:10px 12px; display:none;
+  flex-direction:column; gap:8px; z-index:150;
+  animation:slideUp .2s ease;
+}
+#bulk-bar.show { display:flex; }
+.bulk-bar-top { display:flex; align-items:center; gap:8px; }
+.bulk-count { font-size:13px; font-weight:700; color:var(--blue); flex:1; }
+.bulk-btns { display:flex; gap:6px; }
+.btn-bulk {
+  padding:8px 14px; border-radius:9px; border:none;
+  font-family:var(--font-th); font-size:12px; font-weight:700;
+  cursor:pointer;
+}
+.btn-bulk-out  { background:rgba(247,127,0,.2); color:var(--orange); }
+.btn-bulk-in   { background:rgba(61,214,140,.2); color:var(--green); }
+.btn-bulk-cancel { background:var(--surface); color:var(--muted2); border:1px solid var(--border); }
+
+/* ── EMPTY STATE ─────────────────────────────────────────── */
+.empty { text-align:center; padding:48px 20px; }
+.empty-ico { font-size:52px; margin-bottom:12px; opacity:.5; }
+.empty-txt { font-size:14px; color:var(--muted); line-height:1.7; }
+
+/* ── TOOL NUMBER BADGE ───────────────────────────────────── */
+.card-num {
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:var(--font-en); font-size:11px; font-weight:700;
+  background:rgba(88,166,255,.15); color:var(--blue);
+  border:1px solid rgba(88,166,255,.3);
+  border-radius:6px; padding:1px 7px; margin-left:4px;
+  flex-shrink:0; white-space:nowrap;
+}
+.card-name-row { display:flex; align-items:center; gap:0; flex-wrap:wrap; }
+
+/* ── CATEGORY MANAGE LIST ────────────────────────────────── */
+.cat-item {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 12px; margin-bottom:7px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r-sm);
+}
+.cat-item-ico { font-size:22px; width:32px; text-align:center; flex-shrink:0; }
+.cat-item-name { flex:1; font-size:14px; font-weight:600; color:var(--text); }
+.cat-item-count { font-size:11px; color:var(--muted); background:var(--surface); padding:2px 8px; border-radius:10px; border:1px solid var(--border); }
+.cat-item-del {
+  border:none; background:rgba(248,81,73,.1); color:var(--red);
+  border-radius:7px; padding:5px 9px; font-size:12px; cursor:pointer;
+  font-family:var(--font-th); font-weight:700;
+}
+.cat-item-del:disabled { opacity:.3; cursor:not-allowed; }
+.cat-item.default { opacity:.7; }
+.cat-item.default .cat-item-del { opacity:.25; pointer-events:none; }
+
+/* ── NUMBER FIELD ROW ────────────────────────────────────── */
+.num-row { display:flex; gap:8px; align-items:flex-start; }
+.num-row .form-input { flex:1; }
+.btn-auto-num {
+  padding:10px 12px; background:rgba(88,166,255,.12);
+  border:1px solid rgba(88,166,255,.3); border-radius:var(--r-sm);
+  color:var(--blue); font-size:12px; font-weight:700; cursor:pointer;
+  white-space:nowrap; font-family:var(--font-th);
+  transition:background .15s;
+}
+.btn-auto-num:active { background:rgba(88,166,255,.25); }
+.num-hint {
+  font-size:11px; color:var(--orange2); margin-top:5px;
+  display:none; align-items:center; gap:4px;
+}
+.num-hint.show { display:flex; }
+
+/* ── FORM CARD ───────────────────────────────────────────── */
+.form-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:18px 16px; margin-bottom:10px;
+}
+.form-title { font-family:var(--font-en); font-size:15px; font-weight:700; color:var(--text); margin-bottom:16px; display:flex; align-items:center; gap:8px; }
+.form-row { margin-bottom:13px; }
+.form-label { font-size:12px; font-weight:600; color:var(--muted2); margin-bottom:6px; display:flex; align-items:center; gap:4px; }
+.req { color:var(--orange); }
+.form-input, .form-select {
+  width:100%; padding:10px 12px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:var(--r-sm); font-family:var(--font-th); font-size:13px; color:var(--text);
+  outline:none; transition:border .2s; appearance:none;
+}
+.form-input:focus, .form-select:focus { border-color:var(--orange); }
+.form-input::placeholder { color:var(--muted); }
+.form-select option { background:var(--surface2); }
+.select-wrap { position:relative; }
+.select-arrow { position:absolute; right:12px; top:50%; transform:translateY(-50%); pointer-events:none; font-size:12px; color:var(--muted); }
+
+.upload-area {
+  border:2px dashed var(--border2); border-radius:var(--r);
+  padding:18px; text-align:center; cursor:pointer;
+  background:var(--surface2); transition:border .2s, background .2s;
+  position:relative; overflow:hidden;
+}
+.upload-area:hover, .upload-area.has-img { border-color:var(--orange); border-style:solid; }
+.upload-ico { font-size:28px; margin-bottom:4px; }
+.upload-txt { font-size:12px; color:var(--muted); }
+.upload-preview { max-width:100%; max-height:140px; border-radius:9px; display:none; margin-top:8px; }
+.upload-preview.show { display:block; }
+
+.btn-submit {
+  width:100%; padding:13px; background:var(--orange); color:#fff;
+  border:none; border-radius:var(--r); font-family:var(--font-th); font-size:14px; font-weight:700;
+  cursor:pointer; transition:background .2s; margin-top:4px;
+  display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.btn-submit:hover { background:#e07000; }
+.btn-cancel-edit {
+  width:100%; padding:11px; background:var(--surface2); color:var(--muted2);
+  border:1px solid var(--border); border-radius:var(--r); font-family:var(--font-th); font-size:13px; font-weight:600;
+  cursor:pointer; margin-top:8px; display:none;
+}
+.btn-cancel-edit.show { display:block; }
+
+/* ── SUMMARY TAB ─────────────────────────────────────────── */
+.summary-header {
+  background:linear-gradient(135deg, var(--surface2) 0%, #1a1f2e 100%);
+  border:1px solid var(--border); border-radius:var(--r);
+  padding:18px 16px; margin-bottom:12px;
+  position:relative; overflow:hidden;
+}
+.summary-header::after {
+  content:'⚡'; position:absolute; right:-8px; top:-8px;
+  font-size:80px; opacity:.05; transform:rotate(15deg);
+}
+.sum-title { font-family:var(--font-en); font-size:17px; font-weight:700; color:var(--text); }
+.sum-date { font-size:12px; color:var(--orange2); margin-top:3px; font-weight:500; }
+.sum-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+
+.sum-section-title {
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.8px;
+  color:var(--muted); display:flex; align-items:center; gap:8px;
+  margin:14px 0 8px;
+}
+.sum-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.sum-row {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r-sm); padding:10px 12px;
+  display:flex; align-items:center; gap:10px; margin-bottom:6px;
+}
+.sum-row-img {
+  width:44px; height:44px; border-radius:8px; flex-shrink:0;
+  background:var(--surface2); display:flex; align-items:center; justify-content:center; font-size:20px; overflow:hidden;
+}
+.sum-row-img img { width:100%; height:100%; object-fit:cover; border-radius:8px; cursor:zoom-in; }
+.sum-row-name { font-weight:700; font-size:13px; }
+.sum-row-loc { font-size:11px; color:var(--muted2); margin-top:2px; }
+
+.export-btns { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.btn-export {
+  width:100%; padding:13px; border:none; border-radius:var(--r);
+  font-family:var(--font-th); font-size:14px; font-weight:700;
+  cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-shot { background:var(--orange); color:#fff; box-shadow:0 4px 20px rgba(247,127,0,.3); }
+.btn-pdf  { background:var(--surface2); color:var(--blue);   border:1px solid rgba(88,166,255,.3); }
+.btn-copy { background:var(--surface2); color:var(--muted2); border:1px solid var(--border); }
+.btn-excel { background:rgba(34,197,94,.12); color:#22c55e; border:1px solid rgba(34,197,94,.3); }
+
+/* ── HISTORY ─────────────────────────────────────────────── */
+.hist-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.hist-title { font-family:var(--font-en); font-size:14px; font-weight:700; color:var(--text); }
+.btn-clear-hist {
+  border:none; border-radius:7px; padding:5px 11px;
+  background:rgba(248,81,73,.1); color:var(--red);
+  font-family:var(--font-th); font-size:11px; font-weight:700; cursor:pointer;
+}
+.hist-filter { display:flex; gap:5px; margin-bottom:10px; }
+.hist-chip {
+  padding:4px 11px; border-radius:20px; font-size:11px; font-weight:600;
+  cursor:pointer; border:1px solid var(--border); background:var(--surface); color:var(--muted2);
+  transition:all .15s;
+}
+.hist-chip.active { background:var(--surface2); border-color:var(--border2); color:var(--text); }
+.hist-item {
+  background:var(--surface); border:1px solid var(--border);
+  border-left:3px solid var(--border);
+  border-radius:var(--r-sm); padding:10px 12px;
+  margin-bottom:6px; display:flex; gap:10px;
+}
+.hist-item.h-out  { border-left-color:var(--orange); }
+.hist-item.h-in   { border-left-color:var(--green); }
+.hist-item.h-edit { border-left-color:var(--yellow); }
+.hist-item.h-del  { border-left-color:var(--red); }
+.hist-ico { font-size:20px; flex-shrink:0; }
+.hist-body { flex:1; min-width:0; }
+.hist-name { font-weight:700; font-size:13px; color:var(--text); }
+.hist-action { font-size:11px; color:var(--muted2); margin-top:1px; }
+.hist-time { font-size:10px; color:var(--muted); margin-top:4px; display:flex; gap:6px; flex-wrap:wrap; }
+.hist-badge { background:var(--surface2); border-radius:20px; padding:2px 8px; font-weight:600; }
+
+/* ── MODAL SHEET ─────────────────────────────────────────── */
+.overlay {
+  visibility:hidden; opacity:0; pointer-events:none;
+  position:fixed; inset:0; z-index:9000;
   background:rgba(0,0,0,.65);
-  display:flex;align-items:flex-end;justify-content:center;
-  transition:opacity .25s,visibility .25s;
+  display:flex; align-items:flex-end; justify-content:center;
+  transition:opacity .25s, visibility .25s;
 }
-.overlay.open{visibility:visible;opacity:1;pointer-events:auto;}
-.sheet{
-  background:var(--surface2);border:1px solid var(--border2);
-  border-radius:20px 20px 0 0;padding:20px 16px 36px;
-  width:100%;max-width:480px;animation:sheetUp .25s ease;
+.overlay.open { visibility:visible; opacity:1; pointer-events:auto; }
+.sheet {
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:20px 20px 0 0; padding:20px 16px 36px;
+  width:100%; max-width:480px;
+  animation:sheetUp .25s ease;
 }
-@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
-.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px;}
-.sheet-title{font-family:var(--font-en);font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;}
-.sheet-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
-.sheet-field{margin-bottom:12px;}
-.sheet-label{font-size:12px;font-weight:600;color:var(--muted2);margin-bottom:5px;display:block;}
-.sheet-input{
-  width:100%;padding:10px 12px;
-  background:var(--bg);border:1px solid var(--border2);
-  border-radius:var(--r-sm);font-family:var(--font-th);font-size:14px;color:var(--text);
-  outline:none;transition:border .2s;
+@keyframes sheetUp { from{transform:translateY(100%)} to{transform:none} }
+.sheet-handle { width:36px; height:4px; background:var(--border2); border-radius:2px; margin:0 auto 18px; }
+.sheet-title { font-family:var(--font-en); font-size:16px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.sheet-sub { font-size:12px; color:var(--muted); margin-bottom:16px; }
+.sheet-field { margin-bottom:12px; }
+.sheet-label { font-size:12px; font-weight:600; color:var(--muted2); margin-bottom:5px; display:block; }
+.sheet-input {
+  width:100%; padding:10px 12px;
+  background:var(--bg); border:1px solid var(--border2);
+  border-radius:var(--r-sm); font-family:var(--font-th); font-size:14px; color:var(--text);
+  outline:none; transition:border .2s;
 }
-.sheet-input:focus{border-color:var(--orange);}
-.sheet-input::placeholder{color:var(--muted);}
-.photo-area{
-  border:2px dashed var(--border2);border-radius:var(--r);
-  padding:12px;text-align:center;cursor:pointer;
-  background:var(--bg);transition:all .2s;position:relative;overflow:hidden;
-}
-.photo-area:hover,.photo-area.has-img{border-color:var(--orange);border-style:solid;}
-.photo-preview{width:100%;max-height:150px;border-radius:8px;object-fit:cover;display:none;}
-.photo-preview.show{display:block;}
-.photo-remove{
-  position:absolute;top:6px;right:6px;
-  background:rgba(248,81,73,.85);color:#fff;border:none;border-radius:50%;
-  width:24px;height:24px;font-size:13px;cursor:pointer;
-  display:none;align-items:center;justify-content:center;
-}
-.photo-remove.show{display:flex;}
-.sheet-btns{display:flex;gap:8px;margin-top:6px;}
-.btn-sheet-cancel{flex:1;padding:12px;background:var(--surface);color:var(--muted2);border:1px solid var(--border);border-radius:12px;font-family:var(--font-th);font-size:13px;font-weight:700;cursor:pointer;}
-.btn-sheet-out{flex:2;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:12px;font-family:var(--font-th);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(247,127,0,.3);}
-.btn-sheet-in{flex:2;padding:12px;background:var(--green2);color:#fff;border:none;border-radius:12px;font-family:var(--font-th);font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(61,214,140,.25);}
+.sheet-input:focus { border-color:var(--orange); }
+.sheet-input::placeholder { color:var(--muted); }
 
-/* ── HISTORY ── */
-.hist-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.hist-title{font-family:var(--font-en);font-size:14px;font-weight:700;color:var(--text);}
-.hist-filter{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;}
-.hist-filter::-webkit-scrollbar{display:none;}
-.hist-chip{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--muted2);transition:all .15s;white-space:nowrap;}
-.hist-chip.active{background:var(--surface2);border-color:var(--border2);color:var(--text);}
-.hist-item{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:6px;display:flex;gap:10px;}
-.hist-item.h-out{border-left-color:var(--orange);}
-.hist-item.h-in{border-left-color:var(--green);}
-.hist-item.h-add{border-left-color:var(--blue);}
-.hist-ico{font-size:20px;flex-shrink:0;}
-.hist-body{flex:1;min-width:0;}
-.hist-name{font-weight:700;font-size:13px;color:var(--text);}
-.hist-action{font-size:11px;color:var(--muted2);margin-top:1px;}
-.hist-time{font-size:10px;color:var(--muted);margin-top:4px;display:flex;gap:6px;flex-wrap:wrap;}
-.hist-badge{background:var(--surface2);border-radius:20px;padding:2px 8px;font-weight:600;}
-
-/* ── TOAST ── */
-#toast{
-  position:fixed;bottom:84px;left:50%;transform:translateX(-50%);
-  background:var(--surface2);border:1px solid var(--border2);color:var(--text);
-  padding:10px 18px;border-radius:12px;font-size:12px;font-weight:600;
-  opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;
-  white-space:nowrap;box-shadow:0 0 0 1px var(--border),0 8px 32px rgba(0,0,0,.4);
+.photo-area {
+  border:2px dashed var(--border2); border-radius:var(--r);
+  padding:12px; text-align:center; cursor:pointer;
+  background:var(--bg); transition:all .2s; position:relative; overflow:hidden;
 }
-#toast.show{opacity:1;}
+.photo-area:hover, .photo-area.has-img { border-color:var(--orange); border-style:solid; }
+.photo-preview { width:100%; max-height:150px; border-radius:8px; object-fit:cover; display:none; }
+.photo-preview.show { display:block; }
+.photo-remove {
+  position:absolute; top:6px; right:6px;
+  background:rgba(248,81,73,.85); color:#fff; border:none; border-radius:50%;
+  width:24px; height:24px; font-size:13px; cursor:pointer;
+  display:none; align-items:center; justify-content:center;
+}
+.photo-remove.show { display:flex; }
 
-/* ── LIGHTBOX ── */
-.lbox{visibility:hidden;opacity:0;pointer-events:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;transition:opacity .2s,visibility .2s;}
-.lbox.open{visibility:visible;opacity:1;pointer-events:auto;}
-.lbox img{max-width:96vw;max-height:90vh;border-radius:12px;object-fit:contain;animation:zoomIn .2s ease;}
-.lbox-close{position:fixed;top:14px;right:14px;background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
-@keyframes zoomIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.sheet-btns { display:flex; gap:8px; margin-top:6px; }
+.btn-sheet-cancel {
+  flex:1; padding:12px; background:var(--surface); color:var(--muted2);
+  border:1px solid var(--border); border-radius:12px;
+  font-family:var(--font-th); font-size:13px; font-weight:700; cursor:pointer;
+}
+.btn-sheet-out {
+  flex:2; padding:12px; background:var(--orange); color:#fff;
+  border:none; border-radius:12px;
+  font-family:var(--font-th); font-size:14px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 16px rgba(247,127,0,.3);
+}
+.btn-sheet-in {
+  flex:2; padding:12px; background:var(--green2); color:#fff;
+  border:none; border-radius:12px;
+  font-family:var(--font-th); font-size:14px; font-weight:700; cursor:pointer;
+  box-shadow:0 4px 16px rgba(61,214,140,.25);
+}
 
-/* ── BOTTOM NAV ── */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  background:rgba(13,17,23,.95);backdrop-filter:blur(20px);
+/* bulk modal */
+.bulk-who-list { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+.who-chip {
+  padding:5px 12px; border-radius:20px; font-size:12px; font-weight:600;
+  background:var(--surface); border:1px solid var(--border2); color:var(--muted2);
+  cursor:pointer; transition:all .15s;
+}
+.who-chip.selected { background:var(--orange); border-color:var(--orange); color:#fff; }
+
+/* ── TOAST ───────────────────────────────────────────────── */
+#toast {
+  position:fixed; bottom:84px; left:50%; transform:translateX(-50%);
+  background:var(--surface2); border:1px solid var(--border2); color:var(--text);
+  padding:10px 18px; border-radius:12px; font-size:12px; font-weight:600;
+  opacity:0; transition:opacity .3s; pointer-events:none; z-index:9999;
+  white-space:nowrap; box-shadow:var(--shadow);
+}
+#toast.show { opacity:1; }
+
+/* ── LIGHTBOX ────────────────────────────────────────────── */
+.lbox {
+  visibility:hidden; opacity:0; pointer-events:none;
+  position:fixed; inset:0; z-index:9999;
+  background:rgba(0,0,0,.92);
+  display:flex; align-items:center; justify-content:center;
+  transition:opacity .2s, visibility .2s;
+}
+.lbox.open { visibility:visible; opacity:1; pointer-events:auto; }
+.lbox img { max-width:96vw; max-height:90vh; border-radius:12px; object-fit:contain; animation:zoomIn .2s ease; }
+.lbox-close {
+  position:fixed; top:14px; right:14px;
+  background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:50%;
+  width:38px; height:38px; font-size:18px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+}
+@keyframes zoomIn { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+
+/* ── PDF PROGRESS ────────────────────────────────────────── */
+#pdf-overlay {
+  display:none; position:fixed; inset:0; z-index:99999;
+  background:rgba(13,17,23,.9); backdrop-filter:blur(8px);
+  align-items:center; justify-content:center; flex-direction:column; gap:14px;
+}
+#pdf-overlay.show { display:flex; }
+.pdf-ico { font-size:32px; }
+.pdf-txt { color:var(--text); font-size:13px; font-weight:600; }
+.pdf-bar-wrap { width:240px; background:var(--border); border-radius:20px; height:8px; overflow:hidden; }
+.pdf-bar { height:100%; background:var(--orange); border-radius:20px; width:0%; transition:width .2s; }
+.pdf-ctr { color:var(--muted); font-size:11px; }
+
+/* ── PWA BAR ─────────────────────────────────────────────── */
+#pwa-bar {
+  display:none; background:linear-gradient(90deg,var(--orange),#FF4500);
+  padding:9px 14px; align-items:center; gap:8px;
+}
+#pwa-bar.show { display:flex; }
+.pwa-text { flex:1; color:#fff; font-size:12px; font-weight:600; }
+.pwa-text small { display:block; opacity:.8; font-size:11px; }
+.btn-pwa { background:#fff; color:var(--orange); border:none; border-radius:8px; padding:6px 13px; font-family:var(--font-th); font-size:12px; font-weight:700; cursor:pointer; }
+.btn-pwa-dismiss { background:none; border:none; color:rgba(255,255,255,.7); font-size:16px; cursor:pointer; padding:0; line-height:1; }
+
+/* ── FAB (เพิ่มอุปกรณ์) ──────────────────────────────────── */
+#fab {
+  position:fixed; bottom:80px; right:14px; z-index:120;
+  width:52px; height:52px; border-radius:50%;
+  background:var(--orange); color:#fff; border:none;
+  font-size:24px; cursor:pointer;
+  box-shadow:0 4px 20px rgba(247,127,0,.5);
+  display:flex; align-items:center; justify-content:center;
+  transition:transform .15s, background .15s;
+  display:none;
+}
+#fab:active { transform:scale(.9); }
+
+/* ── BOTTOM NAV PROXY ────────────────────────────────────── */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0;
+  background:rgba(13,17,23,.95); backdrop-filter:blur(20px);
   border-top:1px solid var(--border);
-  display:flex;height:64px;z-index:100;
+  display:flex; height:64px; z-index:100;
   padding-bottom:env(safe-area-inset-bottom,0);
 }
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;padding:0;transition:color .15s;color:var(--muted);}
-.bnav-btn .b-ico{font-size:20px;line-height:1;}
-.bnav-btn .b-lbl{font-family:var(--font-th);font-size:10px;font-weight:600;}
-.bnav-btn.active{color:var(--orange);}
+.bnav-btn {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:3px; background:none; border:none; cursor:pointer; padding:0;
+  transition:color .15s;
+}
+.bnav-btn .b-ico { font-size:20px; line-height:1; }
+.bnav-btn .b-lbl { font-family:var(--font-th); font-size:10px; font-weight:600; }
+.bnav-btn { color:var(--muted); }
+.bnav-btn.active { color:var(--orange); }
+
+/* ── RESPONSIVE ──────────────────────────────────────────── */
+@media (max-width:360px) {
+  .card-img { width:50px; height:50px; font-size:22px; }
+  .stat-num { font-size:22px; }
+}
 </style>
 </head>
 <body>
 
-<!-- ═══ LOGIN SCREEN ═══ -->
-<div id="login-screen">
-  <div class="login-logo">⚡</div>
-  <div class="login-title">ToolTrack</div>
-  <div class="login-sub">ระบบติดตามเครื่องมือช่าง<br>กรอกชื่อเพื่อเข้าใช้งาน</div>
-  <div class="login-card">
-    <label class="login-label">ชื่อ-นามสกุล</label>
-    <input class="login-input" id="login-name" placeholder="เช่น สมชาย ใจดี" type="text" autocomplete="name">
-    <button class="btn-login" onclick="doLogin()">เข้าใช้งาน →</button>
-  </div>
-</div>
-
-<!-- ═══ MAIN APP ═══ -->
-<div id="main-app" style="display:none">
-
-<!-- WHO BANNER -->
-<div id="who-banner">
-  <span>👤 เข้าใช้งานในชื่อ: <b id="banner-name"></b></span>
-  <button class="btn-change-who" onclick="changeName()">เปลี่ยน</button>
+<!-- PWA Bar -->
+<div id="pwa-bar">
+  <div class="pwa-text">📲 ติดตั้งแอปบนมือถือ<small>ใช้งานได้แม้ไม่มีอินเทอร์เน็ต</small></div>
+  <button class="btn-pwa" id="btn-pwa-install">ติดตั้ง</button>
+  <button class="btn-pwa-dismiss" onclick="dismissPwa()">✕</button>
 </div>
 
 <!-- NAV -->
@@ -367,108 +603,196 @@ body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-heigh
 </div>
 
 <!-- TAB BAR -->
-<div class="tabbar">
+<div class="tabbar" id="tabbar">
   <button class="tab active" data-tab="list" onclick="switchTab('list')">
     <span class="tab-ico">📋</span>รายการ
   </button>
   <button class="tab" data-tab="add" onclick="switchTab('add')">
     <span class="tab-ico">➕</span>เพิ่ม
   </button>
+  <button class="tab" data-tab="summary" onclick="switchTab('summary')">
+    <span class="tab-ico">📊</span>สรุป
+  </button>
+  <button class="tab" data-tab="cats" onclick="switchTab('cats')">
+    <span class="tab-ico">🏷️</span>หมวดหมู่
+  </button>
   <button class="tab" data-tab="history" onclick="switchTab('history')">
     <span class="tab-ico">📜</span>ประวัติ
   </button>
 </div>
 
-<!-- ═══ PAGE: LIST ═══ -->
+<!-- ═══ PAGE: LIST ════════════════════════════════════════ -->
 <div class="page active" id="page-list">
+
+  <!-- Stats -->
   <div class="stat-strip">
     <div class="stat-box"><div class="stat-num sn-total" id="st-total">0</div><div class="stat-lbl">ทั้งหมด</div></div>
-    <div class="stat-box"><div class="stat-num sn-in" id="st-in">0</div><div class="stat-lbl">ในออฟฟิศ</div></div>
-    <div class="stat-box"><div class="stat-num sn-out" id="st-out">0</div><div class="stat-lbl">นำออก</div></div>
+    <div class="stat-box"><div class="stat-num sn-in"    id="st-in">0</div><div class="stat-lbl">ในออฟฟิศ</div></div>
+    <div class="stat-box"><div class="stat-num sn-out"   id="st-out">0</div><div class="stat-lbl">นำออก</div></div>
   </div>
+
+  <!-- Search + Bulk Toggle -->
   <div class="search-row">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input class="search-input" id="search-input" placeholder="ค้นหาเครื่องมือ..." oninput="renderList()">
+      <input class="search-input" id="search-input" placeholder="ค้นหาอุปกรณ์..." oninput="renderList()">
     </div>
+    <button class="btn-filter" id="btn-bulk-toggle" onclick="toggleBulkMode()" title="เลือกหลายรายการ">☑️</button>
   </div>
+
+  <!-- Filter Chips -->
   <div class="filter-chips" id="filter-chips">
     <span class="chip active" data-filter="all" onclick="setFilter('all',this)">ทั้งหมด</span>
-    <span class="chip" data-filter="in" onclick="setFilter('in',this)">✅ ในออฟฟิศ</span>
+    <span class="chip" data-filter="in"  onclick="setFilter('in',this)">✅ ในออฟฟิศ</span>
     <span class="chip" data-filter="out" onclick="setFilter('out',this)">🚧 นำออก</span>
   </div>
+
+  <!-- Bulk Action Bar -->
+  <div id="bulk-bar">
+    <div class="bulk-bar-top">
+      <span class="bulk-count" id="bulk-count-txt">เลือก 0 รายการ</span>
+      <div class="bulk-btns">
+        <button class="btn-bulk btn-bulk-out" onclick="bulkAction('out')">🚧 นำออกทั้งหมด</button>
+        <button class="btn-bulk btn-bulk-in"  onclick="bulkAction('in')">✅ นำกลับทั้งหมด</button>
+        <button class="btn-bulk btn-bulk-cancel" onclick="toggleBulkMode()">ยกเลิก</button>
+      </div>
+    </div>
+  </div>
+
   <div class="tools-list" id="tools-list">
-    <div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">กำลังโหลด...</div></div>
+    <div class="empty"><div class="empty-ico">🔧</div><div class="empty-txt">ยังไม่มีอุปกรณ์<br>กดแท็บ "เพิ่ม" เพื่อเริ่มต้น</div></div>
   </div>
 </div>
 
-<!-- ═══ PAGE: ADD ═══ -->
+<!-- ═══ PAGE: ADD/EDIT ════════════════════════════════════ -->
 <div class="page" id="page-add">
   <div class="form-card">
-    <div class="form-title">➕ <span>เพิ่มเครื่องมือใหม่</span></div>
+    <div class="form-title" id="form-title">➕ <span>เพิ่มอุปกรณ์ใหม่</span></div>
+    <input type="hidden" id="edit-id">
+
     <div class="form-row">
-      <label class="form-label">ชื่อเครื่องมือ <span class="req">*</span></label>
+      <label class="form-label">ชื่ออุปกรณ์ <span class="req">*</span></label>
       <input class="form-input" id="f-name" placeholder="เช่น สว่านไฟฟ้า Bosch 13mm" type="text" oninput="checkDupName()">
     </div>
+
     <div class="form-row">
       <label class="form-label">🔢 หมายเลขประจำเครื่อง <span style="font-weight:400;color:var(--muted)">(ถ้ามีหลายอัน)</span></label>
       <div class="num-row">
-        <input class="form-input" id="f-num" placeholder="เช่น 1, 2, A..." type="text" maxlength="10">
+        <input class="form-input" id="f-num" placeholder="เช่น 1, 2, A, B ..." type="text" maxlength="10">
         <button class="btn-auto-num" type="button" onclick="autoAssignNum()">⚡ อัตโนมัติ</button>
       </div>
       <div class="num-hint" id="num-hint">⚠️ <span id="num-hint-txt"></span></div>
     </div>
+
     <div class="form-row">
       <label class="form-label">หมวดหมู่</label>
       <div class="select-wrap">
-        <select class="form-select" id="f-cat"></select>
+        <select class="form-select" id="f-cat">
+        </select>
         <span class="select-arrow">▾</span>
       </div>
     </div>
+
     <div class="form-row">
-      <label class="form-label">รูปภาพเครื่องมือ</label>
+      <label class="form-label">รูปภาพอุปกรณ์</label>
       <div class="upload-area" id="upload-area" onclick="document.getElementById('f-img').click()">
         <div class="upload-ico" id="upload-ico">📷</div>
-        <div class="upload-txt" id="upload-txt">แตะเพื่อถ่ายรูป/เลือกรูป</div>
+        <div class="upload-txt" id="upload-txt">แตะเพื่อเลือกหรือถ่ายรูป</div>
         <img id="f-preview" class="upload-preview">
       </div>
       <input type="file" id="f-img" accept="image/*" style="display:none" onchange="handleImg(this)">
     </div>
+
     <div class="form-row">
       <label class="form-label">หมายเหตุ</label>
       <input class="form-input" id="f-note" placeholder="รายละเอียดเพิ่มเติม..." type="text">
     </div>
-    <button class="btn-submit" onclick="saveTool()">💾 บันทึกเครื่องมือ</button>
+
+    <button class="btn-submit" onclick="saveTool()">💾 บันทึกอุปกรณ์</button>
+    <button class="btn-cancel-edit" id="btn-cancel-edit" onclick="cancelEdit()">ยกเลิกการแก้ไข</button>
   </div>
 </div>
 
-<!-- ═══ PAGE: HISTORY ═══ -->
+<!-- ═══ PAGE: SUMMARY ═════════════════════════════════════ -->
+<div class="page" id="page-summary">
+  <div id="snap-area">
+    <div class="summary-header">
+      <div class="sum-title">⚡ สรุปอุปกรณ์ช่างไฟฟ้า</div>
+      <div class="sum-date" id="sum-date"></div>
+      <div class="sum-sub" id="sum-sub"></div>
+    </div>
+    <div id="sum-in"></div>
+    <div id="sum-out"></div>
+    <div class="empty" id="sum-empty" style="display:none">
+      <div class="empty-ico">📭</div><div class="empty-txt">ยังไม่มีข้อมูล</div>
+    </div>
+  </div>
+  <div class="export-btns">
+    <button class="btn-export btn-shot" onclick="doShot()">📸 บันทึกภาพส่ง LINE</button>
+    <button class="btn-export btn-pdf"  onclick="exportPDF()">📄 ส่งออก PDF (ทุกอุปกรณ์)</button>
+    <button class="btn-export btn-copy" onclick="copyText()">📋 คัดลอกข้อความส่ง LINE</button>
+    <button class="btn-export btn-excel" onclick="exportExcel()">📊 ส่งออก Excel (จัดหมวดหมู่)</button>
+  </div>
+</div>
+
+<!-- ═══ PAGE: CATEGORIES ══════════════════════════════════ -->
+<div class="page" id="page-cats">
+  <div class="form-card">
+    <div class="form-title">🏷️ <span>จัดการหมวดหมู่</span></div>
+    <div class="form-row">
+      <label class="form-label">ไอคอน (Emoji)</label>
+      <input class="form-input" id="c-emoji" placeholder="เช่น 🔧 🪚 📟 ⚙️" maxlength="4" style="font-size:22px;text-align:center;">
+    </div>
+    <div class="form-row">
+      <label class="form-label">ชื่อหมวดหมู่ <span class="req">*</span></label>
+      <input class="form-input" id="c-name" placeholder="เช่น สว่าน, คีม, มิเตอร์..." type="text" maxlength="20">
+    </div>
+    <button class="btn-submit" onclick="saveCategory()" style="margin-top:0">➕ เพิ่มหมวดหมู่</button>
+  </div>
+
+  <div class="form-card" style="margin-top:0">
+    <div class="form-title" style="margin-bottom:10px">📋 <span>หมวดหมู่ทั้งหมด</span></div>
+    <div id="cat-list"></div>
+  </div>
+</div>
+
+<!-- ═══ PAGE: HISTORY ═════════════════════════════════════ -->
 <div class="page" id="page-history">
   <div class="hist-header">
     <span class="hist-title">ประวัติการใช้งาน</span>
+    <button class="btn-clear-hist" onclick="clearHistory()">🗑️ ล้างประวัติ</button>
   </div>
-  <div class="hist-filter" id="hist-filter-row">
-    <span class="hist-chip active" data-hf="all" onclick="setHistFilter('all',this)">ทั้งหมด</span>
-    <span class="hist-chip" data-hf="out" onclick="setHistFilter('out',this)">🚧 นำออก</span>
-    <span class="hist-chip" data-hf="in" onclick="setHistFilter('in',this)">✅ นำกลับ</span>
-    <span class="hist-chip" data-hf="add" onclick="setHistFilter('add',this)">➕ เพิ่มใหม่</span>
+  <div class="hist-filter">
+    <span class="hist-chip active" data-hf="all"  onclick="setHistFilter('all',this)">ทั้งหมด</span>
+    <span class="hist-chip"       data-hf="out"  onclick="setHistFilter('out',this)">🚧 นำออก</span>
+    <span class="hist-chip"       data-hf="in"   onclick="setHistFilter('in',this)">✅ นำกลับ</span>
+    <span class="hist-chip"       data-hf="edit" onclick="setHistFilter('edit',this)">✏️ แก้ไข</span>
+    <span class="hist-chip"       data-hf="del"  onclick="setHistFilter('del',this)">🗑️ ลบ</span>
   </div>
   <div id="history-list">
     <div class="empty"><div class="empty-ico">📜</div><div class="empty-txt">ยังไม่มีประวัติ</div></div>
   </div>
 </div>
 
-</div><!-- /main-app -->
-
 <!-- MODAL: นำออก -->
 <div class="overlay" id="m-out">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">🚧 นำเครื่องมือออก</div>
+    <div class="sheet-title">🚧 นำอุปกรณ์ออกจากออฟฟิศ</div>
     <div class="sheet-sub" id="m-out-name"></div>
     <div class="sheet-field">
       <label class="sheet-label">สถานที่ / ชื่องาน <span class="req">*</span></label>
       <input class="sheet-input" id="o-loc" placeholder="เช่น หมู่บ้านสุขสันต์, งาน SCG...">
+    </div>
+    <div class="sheet-field">
+      <label class="sheet-label">ช่างที่นำออก <span class="req">*</span></label>
+      <!-- Recent-who quick chips -->
+      <div class="bulk-who-list" id="out-who-chips"></div>
+      <input class="sheet-input" id="o-who" placeholder="ชื่อช่างที่นำออก...">
+    </div>
+    <div class="sheet-field">
+      <label class="sheet-label">หมายเหตุ</label>
+      <input class="sheet-input" id="o-note" placeholder="รายละเอียด (ถ้ามี)">
     </div>
     <div class="sheet-field">
       <label class="sheet-label">📸 รูปสภาพก่อนนำออก</label>
@@ -479,10 +803,6 @@ body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-heigh
         <button class="photo-remove" id="out-photo-remove" onclick="removeOutPhoto(event)">✕</button>
       </div>
       <input type="file" id="o-img" accept="image/*" capture="environment" style="display:none" onchange="handleOutPhoto(this)">
-    </div>
-    <div class="sheet-field">
-      <label class="sheet-label">หมายเหตุ</label>
-      <input class="sheet-input" id="o-note" placeholder="รายละเอียด (ถ้ามี)">
     </div>
     <div class="sheet-btns">
       <button class="btn-sheet-cancel" onclick="closeModal('m-out')">ยกเลิก</button>
@@ -495,16 +815,46 @@ body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-heigh
 <div class="overlay" id="m-in">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">✅ นำเครื่องมือกลับ</div>
+    <div class="sheet-title">✅ นำอุปกรณ์กลับเข้าออฟฟิศ</div>
     <div class="sheet-sub" id="m-in-name"></div>
     <div style="background:rgba(61,214,140,.08);border:1px solid rgba(61,214,140,.2);border-radius:10px;padding:12px;font-size:13px;color:var(--green);margin-bottom:16px;">
-      สถานะจะเปลี่ยนเป็น "ในออฟฟิศ" ทันที
+      สถานะจะเปลี่ยนเป็น "ในออฟฟิศ" ทันที ข้อมูลสถานที่จะถูกล้าง
     </div>
     <div class="sheet-btns">
       <button class="btn-sheet-cancel" onclick="closeModal('m-in')">ยกเลิก</button>
       <button class="btn-sheet-in" onclick="confirmIn()">✅ ยืนยันนำกลับ</button>
     </div>
   </div>
+</div>
+
+<!-- MODAL: Bulk นำออก -->
+<div class="overlay" id="m-bulk-out">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">🚧 นำออกพร้อมกัน</div>
+    <div class="sheet-sub" id="m-bulk-sub"></div>
+    <div class="sheet-field">
+      <label class="sheet-label">สถานที่ / ชื่องาน <span class="req">*</span></label>
+      <input class="sheet-input" id="b-loc" placeholder="เช่น งาน SCG ระยอง">
+    </div>
+    <div class="sheet-field">
+      <label class="sheet-label">ช่างที่นำออก <span class="req">*</span></label>
+      <div class="bulk-who-list" id="bulk-who-chips"></div>
+      <input class="sheet-input" id="b-who" placeholder="ชื่อช่าง...">
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-sheet-cancel" onclick="closeModal('m-bulk-out')">ยกเลิก</button>
+      <button class="btn-sheet-out" onclick="confirmBulkOut()">🚧 ยืนยันนำออกทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF Progress -->
+<div id="pdf-overlay">
+  <div class="pdf-ico">📄</div>
+  <div class="pdf-txt" id="pdf-txt">กำลังสร้าง PDF...</div>
+  <div class="pdf-bar-wrap"><div class="pdf-bar" id="pdf-bar"></div></div>
+  <div class="pdf-ctr" id="pdf-ctr"></div>
 </div>
 
 <!-- Lightbox -->
@@ -523,364 +873,518 @@ body{font-family:var(--font-th);background:var(--bg);color:var(--text);min-heigh
   <button class="bnav-btn" id="bn-add" onclick="switchTab('add')">
     <span class="b-ico">➕</span><span class="b-lbl">เพิ่ม</span>
   </button>
+  <button class="bnav-btn" id="bn-summary" onclick="switchTab('summary')">
+    <span class="b-ico">📊</span><span class="b-lbl">สรุป</span>
+  </button>
+  <button class="bnav-btn" id="bn-cats" onclick="switchTab('cats')">
+    <span class="b-ico">🏷️</span><span class="b-lbl">หมวดหมู่</span>
+  </button>
   <button class="bnav-btn" id="bn-history" onclick="switchTab('history')">
     <span class="b-ico">📜</span><span class="b-lbl">ประวัติ</span>
   </button>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-/* ── LOCAL STORAGE (เก็บข้อมูลในเครื่องนี้เท่านั้น ไม่ sync กับเครื่องอื่น) ── */
-const LS_TOOLS='tooltrack-tools', LS_HIST='tooltrack-history', LS_CATS='tooltrack-categories';
-function lsGet(key,fallback){
-  try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}
-}
-function lsSet(key,val){
-  try{localStorage.setItem(key,JSON.stringify(val));return true;}catch(e){console.error('Storage error:',e);return false;}
-}
+/* ═══════════════════════════════════════════════════════════
+   LOCAL DB — เก็บข้อมูลในเครื่อง (localStorage) แทน Firebase
+   ไม่ต้องตั้งค่า Firebase Console / GitHub ใดๆ ทั้งสิ้น
+   หมายเหตุ: ข้อมูลจะอยู่เฉพาะในมือถือ/เบราว์เซอร์เครื่องนี้เท่านั้น
+   ไม่ sync ข้ามเครื่อง — แนะนำให้ "ส่งออกข้อมูล" สำรองไว้เป็นระยะ
+═══════════════════════════════════════════════════════════ */
+const LocalDB = (() => {
+  const listeners = {};
+  const STORE_PREFIX = 'tt_db_';
 
-/* ── STATE ── */
+  function load(collection) {
+    try { return JSON.parse(localStorage.getItem(STORE_PREFIX + collection) || '{}'); }
+    catch { return {}; }
+  }
+  function save(collection, data) {
+    localStorage.setItem(STORE_PREFIX + collection, JSON.stringify(data));
+    notify(collection);
+  }
+  function snapshot(collection) {
+    const data = load(collection);
+    return { val: () => (Object.keys(data).length ? data : null) };
+  }
+  function notify(collection) {
+    (listeners[collection] || []).forEach(cb => cb(snapshot(collection)));
+  }
+
+  function ref(path) {
+    // Root ref — used only for db.ref().update({...})
+    if (!path) {
+      return {
+        update(updates) {
+          const touched = {};
+          Object.entries(updates).forEach(([key, val]) => {
+            const slash = key.indexOf('/');
+            const collection = slash === -1 ? key : key.slice(0, slash);
+            const id = slash === -1 ? null : key.slice(slash + 1);
+            if (!touched[collection]) touched[collection] = load(collection);
+            if (id === null) touched[collection] = val;
+            else touched[collection][id] = val;
+          });
+          Object.entries(touched).forEach(([collection, data]) => save(collection, data));
+        }
+      };
+    }
+    const collection = path;
+    const api = {
+      child(id) {
+        return {
+          set(val) {
+            const data = load(collection);
+            data[id] = val;
+            save(collection, data);
+          },
+          remove() {
+            const data = load(collection);
+            delete data[id];
+            save(collection, data);
+          }
+        };
+      },
+      on(event, cb) {
+        listeners[collection] = listeners[collection] || [];
+        listeners[collection].push(cb);
+        cb(snapshot(collection)); // fire immediately, like Firebase's initial load
+      },
+      orderByChild() { return api; }, // ordering not needed locally; data re-sorted in JS already
+      update(updates) {
+        const data = load(collection);
+        Object.entries(updates).forEach(([k, v]) => { data[k] = v; });
+        save(collection, data);
+      }
+    };
+    return api;
+  }
+
+  return { ref };
+})();
+
+const db        = LocalDB;
+const toolsRef   = db.ref('tools');
+const historyRef = db.ref('history');
+const catsRef    = db.ref('categories');
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
 let tools       = [];
 let historyData = [];
 let categories  = [];
-let currentWho  = '';
+const DEFAULT_CATS = [
+  { name:'สว่าน',  emoji:'🔩', isDefault:true },
+  { name:'คีม',    emoji:'🔧', isDefault:true },
+  { name:'ไขควง',  emoji:'🪛', isDefault:true },
+  { name:'มิเตอร์',emoji:'📟', isDefault:true },
+  { name:'เลื่อย', emoji:'🪚', isDefault:true },
+  { name:'ค้อน',   emoji:'🔨', isDefault:true },
+  { name:'สายไฟ',  emoji:'🔌', isDefault:true },
+  { name:'ป้องกัน',emoji:'🦺', isDefault:true },
+  { name:'อื่นๆ',  emoji:'📦', isDefault:true },
+];
 let curFilter   = 'all';
 let histFilter  = 'all';
-let activeId    = null;
+let bulkMode    = false;
+let selectedIds = new Set();
+let activeId    = null;       // modal target
 let curImgThumb = null;
 let curImgFull  = null;
 let curCondImg  = null;
 
-const DEFAULT_CATS = [
-  {name:'สว่าน',emoji:'🔩',isDefault:true},{name:'คีม',emoji:'🔧',isDefault:true},
-  {name:'ไขควง',emoji:'🪛',isDefault:true},{name:'มิเตอร์',emoji:'📟',isDefault:true},
-  {name:'เลื่อย',emoji:'🪚',isDefault:true},{name:'ค้อน',emoji:'🔨',isDefault:true},
-  {name:'สายไฟ',emoji:'🔌',isDefault:true},{name:'ป้องกัน',emoji:'🦺',isDefault:true},
-  {name:'อื่นๆ',emoji:'📦',isDefault:true},
-];
-
-/* ── DATE UTILS ── */
-const MONTHS_SHORT=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const DAYS=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
-function thaiShort(d=new Date()){return`${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()+543}`;}
-function thaiDay(d=new Date()){return DAYS[d.getDay()];}
-function timeStr(d=new Date()){return d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
-
-/* ── LOGIN ── */
-function doLogin(){
-  const name = document.getElementById('login-name').value.trim();
-  if(!name){showToastLogin('⚠️ กรุณาใส่ชื่อก่อนนะครับ');return;}
-  currentWho = name;
-  try{localStorage.setItem('tooltrack-who',name);}catch(e){}
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('main-app').style.display='block';
-  document.getElementById('banner-name').textContent = name;
-  startApp();
-}
-
-function changeName(){
-  document.getElementById('login-name').value = currentWho;
-  document.getElementById('login-screen').style.display='flex';
-  document.getElementById('main-app').style.display='none';
-}
-
-function showToastLogin(msg){
-  // simple alert for login page
-  const inp = document.getElementById('login-name');
-  inp.style.borderColor='var(--red)';
-  setTimeout(()=>inp.style.borderColor='',1500);
-}
-
-document.getElementById('login-name').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
-
-// Auto-restore name
-(function(){
-  try{
-    const saved=localStorage.getItem('tooltrack-who');
-    if(saved){document.getElementById('login-name').value=saved;}
-  }catch(e){}
-})();
-
-/* ── START APP ── */
-function startApp(){
-  tools=lsGet(LS_TOOLS,[]);
-  historyData=lsGet(LS_HIST,[]);
-  const custom=lsGet(LS_CATS,[]);
-  categories=[
+/* ═══════════════════════════════════════════════════════════
+   REALTIME SYNC — patch-based, no full-array writes
+═══════════════════════════════════════════════════════════ */
+toolsRef.on('value', snap => {
+  const data = snap.val();
+  tools = data ? Object.values(data) : [];
+  flashSync();
+  renderList();
+  if(currentPage() === 'summary') renderSummary();
+  if(currentPage() === 'cats') renderCatList();
+});
+historyRef.orderByChild('ts').on('value', snap => {
+  const data = snap.val();
+  historyData = data ? Object.values(data).reverse() : [];
+  if(currentPage() === 'history') renderHistory();
+});
+catsRef.on('value', snap => {
+  const data = snap.val();
+  const custom = data ? Object.values(data) : [];
+  // Merge defaults + custom (deduplicated by name)
+  const customNames = new Set(custom.map(c => c.name));
+  categories = [
+    ...DEFAULT_CATS.filter(d => !customNames.has(d.name)),
+    ...DEFAULT_CATS.filter(d => customNames.has(d.name)),
+    ...custom.filter(c => !DEFAULT_CATS.find(d => d.name === c.name))
+  ];
+  // Sort: defaults first, then custom alphabetically
+  categories = [
     ...DEFAULT_CATS,
-    ...custom.filter(c=>!DEFAULT_CATS.find(d=>d.name===c.name))
+    ...custom.filter(c => !DEFAULT_CATS.find(d => d.name === c.name))
   ];
   rebuildCatUI();
-  flashSync();
+  if(currentPage() === 'cats') renderCatList();
+});
+
+function patchTool(t) { toolsRef.child(t.id).set(t); }
+function removeTool(id) { toolsRef.child(id).remove(); }
+function addHist(entry) {
+  const now = new Date();
+  historyRef.child(Date.now().toString()).set({
+    id: Date.now().toString(),
+    action: entry.action, toolName: entry.toolName,
+    who: entry.who||'', location: entry.location||'', note: entry.note||'',
+    status: entry.status, ts: now.getTime(),
+    timeStr: now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
+    dateStr: thaiShort(now), dayStr: thaiDay(now)
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DATE UTILS
+═══════════════════════════════════════════════════════════ */
+const MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const DAYS         = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+const MONTHS_LONG  = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+function thaiShort(d=new Date()) { return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()+543}`; }
+function thaiLong (d=new Date()) { return `วัน${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS_LONG[d.getMonth()]} ${d.getFullYear()+543}`; }
+function thaiDay  (d=new Date()) { return DAYS[d.getDay()]; }
+function timeStr  (d=new Date()) { return d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); }
+function slashDate(d=new Date()) { return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`; }
+
+/* init date display */
+document.getElementById('sum-date').textContent = thaiLong();
+
+/* ═══════════════════════════════════════════════════════════
+   TAB / PAGE
+═══════════════════════════════════════════════════════════ */
+const PAGES = { list:'page-list', add:'page-add', summary:'page-summary', cats:'page-cats', history:'page-history' };
+function currentPage() {
+  const a = document.querySelector('.tab.active');
+  return a ? a.dataset.tab : 'list';
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab===name));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.toggle('active', b.id==='bn-'+name));
+  const pg = document.getElementById(PAGES[name]);
+  if(pg) pg.classList.add('active');
+  if(name==='summary') renderSummary();
+  if(name==='history') renderHistory();
+  if(name==='cats') renderCatList();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTER / SEARCH
+═══════════════════════════════════════════════════════════ */
+function setFilter(f, el) {
+  curFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.filter===f));
   renderList();
-  if(currentTab()==='history')renderHistory();
 }
 
-/* ── TAB ── */
-const PAGES={list:'page-list',add:'page-add',history:'page-history'};
-function currentTab(){
-  const a=document.querySelector('.tab.active');
-  return a?a.dataset.tab:'list';
-}
-function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
-  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.toggle('active',b.id==='bn-'+name));
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const pg=document.getElementById(PAGES[name]);
-  if(pg)pg.classList.add('active');
-  if(name==='history')renderHistory();
-}
-
-/* ── LOCAL STORAGE HELPERS ── */
-function patchTool(t){
-  const i=tools.findIndex(x=>x.id===t.id);
-  if(i>=0)tools[i]=t; else tools.push(t);
-  lsSet(LS_TOOLS,tools);
-  flashSync();
-  renderList();
-}
-function addHist(entry){
-  const now=new Date();
-  const rec={
-    id:Date.now().toString(),
-    action:entry.action,toolName:entry.toolName,
-    who:entry.who||currentWho,location:entry.location||'',note:entry.note||'',
-    status:entry.status,ts:now.getTime(),
-    timeStr:now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}),
-    dateStr:thaiShort(now),dayStr:thaiDay(now)
-  };
-  historyData.unshift(rec);
-  lsSet(LS_HIST,historyData);
-  if(currentTab()==='history')renderHistory();
-}
-
-/* ── RENDER LIST ── */
-const CAT_EMOJI={สว่าน:'🔩',คีม:'🔧',ไขควง:'🪛',มิเตอร์:'📟',เลื่อย:'🪚',ค้อน:'🔨',สายไฟ:'🔌',ป้องกัน:'🦺',อื่นๆ:'📦'};
-function catEmoji(cat){
-  const found=categories.find(c=>c.name===cat);
-  if(found)return found.emoji;
-  return CAT_EMOJI[cat]||'📦';
-}
-
-function filteredTools(){
-  const q=(document.getElementById('search-input')?.value||'').trim().toLowerCase();
-  return tools.filter(t=>{
-    if(curFilter==='in'&&t.status!=='in')return false;
-    if(curFilter==='out'&&t.status!=='out')return false;
-    if(curFilter.startsWith('cat-')&&t.cat!==curFilter.slice(4))return false;
-    if(q&&!t.name.toLowerCase().includes(q))return false;
+function filteredTools() {
+  const q = (document.getElementById('search-input')?.value||'').trim().toLowerCase();
+  return tools.filter(t => {
+    if(curFilter==='in'  && t.status!=='in')  return false;
+    if(curFilter==='out' && t.status!=='out') return false;
+    if(curFilter.startsWith('cat-') && t.cat !== curFilter.slice(4)) return false;
+    if(q && !t.name.toLowerCase().includes(q)) return false;
     return true;
   });
 }
 
-function renderList(){
-  const inN=tools.filter(t=>t.status==='in').length;
-  const outN=tools.filter(t=>t.status==='out').length;
-  document.getElementById('st-total').textContent=tools.length;
-  document.getElementById('st-in').textContent=inN;
-  document.getElementById('st-out').textContent=outN;
-  document.getElementById('np-in').textContent=`${inN} ใน`;
-  document.getElementById('np-out').textContent=`${outN} ออก`;
+/* ═══════════════════════════════════════════════════════════
+   RENDER LIST
+═══════════════════════════════════════════════════════════ */
+function renderList() {
+  const inN  = tools.filter(t=>t.status==='in').length;
+  const outN = tools.filter(t=>t.status==='out').length;
+  document.getElementById('st-total').textContent = tools.length;
+  document.getElementById('st-in').textContent    = inN;
+  document.getElementById('st-out').textContent   = outN;
+  document.getElementById('np-in').textContent    = `${inN} ใน`;
+  document.getElementById('np-out').textContent   = `${outN} ออก`;
 
-  const list=document.getElementById('tools-list');
-  const data=filteredTools();
-  if(!data.length){
-    list.innerHTML=`<div class="empty"><div class="empty-ico">${tools.length?'🔍':'🔧'}</div>
-      <div class="empty-txt">${tools.length?'ไม่พบเครื่องมือที่ค้นหา':'ยังไม่มีเครื่องมือในระบบ'}</div></div>`;
+  const list = document.getElementById('tools-list');
+  const data = filteredTools();
+  if(!data.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-ico">${tools.length?'🔍':'🔧'}</div>
+      <div class="empty-txt">${tools.length?'ไม่พบอุปกรณ์ที่ค้นหา':'ยังไม่มีอุปกรณ์<br>กดแท็บ "เพิ่ม" เพื่อเริ่มต้น'}</div></div>`;
     return;
   }
-  const sorted=[...data].sort((a,b)=>{
-    if(a.status==='out'&&b.status!=='out')return -1;
-    if(a.status!=='out'&&b.status==='out')return 1;
+
+  // sort: out first, then by name
+  const sorted = [...data].sort((a,b) => {
+    if(a.status==='out' && b.status!=='out') return -1;
+    if(a.status!=='out' && b.status==='out') return 1;
     return a.name.localeCompare(b.name,'th');
   });
-  list.innerHTML=sorted.map(t=>{
-    const isOut=t.status==='out';
-    const lbSrc=(t.imgFull||t.img||'').replace(/'/g,"\\'");
-    return`
-    <div class="tool-card${isOut?' out':''}">
+
+  list.innerHTML = sorted.map(t => {
+    const isOut  = t.status==='out';
+    const lbSrc  = (t.imgFull||t.img||'').replace(/'/g,"\\'");
+    const chk    = selectedIds.has(t.id);
+    return `
+    <div class="tool-card${isOut?' out':''}${chk?' selected':''}" id="card-${t.id}">
+      <div class="card-check${chk?' checked':''}" onclick="toggleSelect('${t.id}')">✓</div>
       <div class="card-stripe"></div>
       <div class="card-img">
-        ${t.img?`<img src="${t.img}" loading="lazy" onclick="openLbox('${lbSrc}')">`:catEmoji(t.cat||'')}
+        ${t.img ? `<img src="${t.img}" loading="lazy" onclick="openLbox('${lbSrc}')">` : catEmoji(t.cat||'')}
       </div>
       <div class="card-body">
         <div class="card-cat">${t.cat||'อื่นๆ'}</div>
         <div class="card-name-row">
           <span class="card-name">${t.name}</span>
-          ${t.toolNum?`<span class="card-num">#${t.toolNum}</span>`:''}
+          ${t.toolNum ? `<span class="card-num">#${t.toolNum}</span>` : ''}
         </div>
         <span class="card-badge ${isOut?'badge-out':'badge-in'}">${isOut?'🚧 นำออก':'✅ ในออฟฟิศ'}</span>
-        ${isOut?`<div class="card-meta">📍 ${t.location||'-'} · 👤 ${t.who||'-'}</div>`:''}
-        ${t.note?`<div class="card-note">📝 ${t.note}</div>`:''}
-        ${isOut&&t.conditionImg?`<img src="${t.conditionImg}" class="card-cond-img" onclick="openLbox('${t.conditionImg.replace(/'/g,"\\'")}')">` :''}
-        ${t.updatedAt?`<div class="card-time">💾 ${t.updatedAt}</div>`:''}
+        ${isOut ? `<div class="card-meta">📍 ${t.location||'-'} · 👤 ${t.who||'-'}</div>` : ''}
+        ${t.note ? `<div class="card-note">📝 ${t.note}</div>` : ''}
+        ${isOut&&t.conditionImg ? `<img src="${t.conditionImg}" class="card-cond-img" onclick="openLbox('${t.conditionImg.replace(/'/g,"\\'")}')">` : ''}
+        ${t.updatedAt ? `<div class="card-time">💾 ${t.updatedAt}</div>` : ''}
       </div>
       <div class="card-actions">
         ${isOut
-          ?`<button class="btn-act btn-in" onclick="openInModal('${t.id}')">✅ คืน</button>`
-          :`<button class="btn-act btn-out" onclick="openOutModal('${t.id}')">🚧 หยิบใช้</button>`}
+          ? `<button class="btn-act btn-in"  onclick="openInModal('${t.id}')">✅ นำกลับ</button>`
+          : `<button class="btn-act btn-out" onclick="openOutModal('${t.id}')">🚧 นำออก</button>`}
+        <button class="btn-act btn-edit" onclick="editTool('${t.id}')">✏️</button>
+        <button class="btn-act btn-del"  onclick="deleteTool('${t.id}')">🗑️</button>
       </div>
     </div>`;
   }).join('');
 }
 
-/* ── FILTER ── */
-function setFilter(f,el){
-  curFilter=f;
-  document.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.filter===f));
+function catEmoji(cat) {
+  const found = categories.find(c => c.name === cat);
+  if(found) return found.emoji;
+  const map = { 'สว่าน':'🔩','คีม':'🔧','ไขควง':'🪛','มิเตอร์':'📟','เลื่อย':'🪚','ค้อน':'🔨','สายไฟ':'🔌','ป้องกัน':'🦺','อื่นๆ':'📦' };
+  return map[cat] || '📦';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BULK MODE
+═══════════════════════════════════════════════════════════ */
+function toggleBulkMode() {
+  bulkMode = !bulkMode;
+  selectedIds.clear();
+  document.body.classList.toggle('bulk-mode', bulkMode);
+  document.getElementById('bulk-bar').classList.toggle('show', bulkMode);
+  document.getElementById('btn-bulk-toggle').classList.toggle('active', bulkMode);
+  updateBulkCount();
   renderList();
 }
 
-/* ── MODAL: นำออก ── */
-function openOutModal(id){
-  const t=tools.find(x=>x.id===id);if(!t)return;
-  activeId=id;
-  document.getElementById('m-out-name').textContent='🔧 '+t.name+(t.toolNum?` #${t.toolNum}`:'');
-  document.getElementById('o-loc').value='';
-  document.getElementById('o-note').value='';
-  resetOutPhoto();
-  document.getElementById('m-out').classList.add('open');
-  document.body.style.overflow='hidden';
-  setTimeout(()=>document.getElementById('o-loc').focus(),300);
+function toggleSelect(id) {
+  if(!bulkMode) return;
+  if(selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  // update card visually
+  const card = document.getElementById('card-'+id);
+  if(card) {
+    card.classList.toggle('selected', selectedIds.has(id));
+    const chk = card.querySelector('.card-check');
+    if(chk) chk.classList.toggle('checked', selectedIds.has(id));
+  }
+  updateBulkCount();
 }
 
-function confirmOut(){
-  const loc=document.getElementById('o-loc').value.trim();
-  if(!loc){showToast('⚠️ กรุณาระบุสถานที่');return;}
-  const t=tools.find(x=>x.id===activeId);if(!t)return;
-  const now=new Date();
-  const updated={...t,status:'out',location:loc,who:currentWho,
-    note:document.getElementById('o-note').value.trim(),
-    conditionImg:curCondImg||null,
-    updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
-  patchTool(updated);
-  addHist({action:'out',toolName:t.name,status:'out',who:currentWho,location:loc,note:updated.note});
-  closeModal('m-out');
-  showToast('🚧 หยิบใช้แล้ว!');
+function updateBulkCount() {
+  document.getElementById('bulk-count-txt').textContent = `เลือก ${selectedIds.size} รายการ`;
 }
 
-/* ── MODAL: นำกลับ ── */
-function openInModal(id){
-  const t=tools.find(x=>x.id===id);if(!t)return;
-  activeId=id;
-  document.getElementById('m-in-name').textContent=`🔧 ${t.name}${t.toolNum?' #'+t.toolNum:''}${t.location?'  ·  📍 '+t.location:''}`;
-  document.getElementById('m-in').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-
-function confirmIn(){
-  const t=tools.find(x=>x.id===activeId);if(!t)return;
-  const now=new Date();
-  const updated={...t,status:'in',location:'',who:'',conditionImg:null,
-    updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
-  patchTool(updated);
-  addHist({action:'in',toolName:t.name,status:'in',who:currentWho});
-  closeModal('m-in');
-  showToast('✅ คืนแล้ว!');
-}
-
-function closeModal(id){
-  document.getElementById(id).classList.remove('open');
-  document.body.style.overflow='';
-  activeId=null;
-}
-
-/* ── ADD TOOL ── */
-function saveTool(){
-  const name=document.getElementById('f-name').value.trim();
-  if(!name){showToast('⚠️ กรุณาใส่ชื่อเครื่องมือ');return;}
-  const now=new Date();
-  const toolNum=document.getElementById('f-num').value.trim();
-  const tool={
-    id:Date.now().toString(),
-    name,
-    toolNum:toolNum||'',
-    cat:document.getElementById('f-cat').value,
-    status:'in',
-    location:'',who:'',
-    note:document.getElementById('f-note').value.trim(),
-    img:curImgThumb||null,
-    imgFull:curImgFull||null,
-    conditionImg:null,
-    addedBy:currentWho,
-    updatedAt:`${timeStr(now)} ${thaiShort(now)}`
-  };
-  patchTool(tool);
-  addHist({action:'add',toolName:name,status:'in',who:currentWho});
-  resetForm();
-  showToast('✅ เพิ่มเครื่องมือสำเร็จ!');
-  switchTab('list');
-}
-
-function resetForm(){
-  document.getElementById('f-name').value='';
-  document.getElementById('f-num').value='';
-  document.getElementById('f-cat').value='อื่นๆ';
-  document.getElementById('f-note').value='';
-  document.getElementById('f-img').value='';
-  document.getElementById('num-hint').classList.remove('show');
-  const prev=document.getElementById('f-preview');
-  prev.src='';prev.classList.remove('show');
-  document.getElementById('upload-area').classList.remove('has-img');
-  document.getElementById('upload-ico').style.display='';
-  document.getElementById('upload-txt').textContent='แตะเพื่อถ่ายรูป/เลือกรูป';
-  curImgThumb=null;curImgFull=null;
-}
-
-/* ── DUPLICATE CHECK ── */
-function checkDupName(){
-  const name=document.getElementById('f-name').value.trim().toLowerCase();
-  if(!name){document.getElementById('num-hint').classList.remove('show');return;}
-  const dups=tools.filter(t=>t.name.toLowerCase()===name);
-  const hint=document.getElementById('num-hint');
-  const hintTxt=document.getElementById('num-hint-txt');
-  if(dups.length>0){
-    const nums=dups.map(t=>t.toolNum?`#${t.toolNum}`:'(ไม่มีหมายเลข)').join(', ');
-    hintTxt.textContent=`มีอยู่แล้ว ${dups.length} อัน: ${nums} — กด ⚡ เพื่อใส่หมายเลขถัดไปอัตโนมัติ`;
-    hint.classList.add('show');
+function bulkAction(dir) {
+  if(!selectedIds.size) { showToast('⚠️ ยังไม่ได้เลือกรายการ'); return; }
+  if(dir === 'out') {
+    document.getElementById('m-bulk-sub').textContent = `${selectedIds.size} รายการที่เลือก`;
+    renderWhoChips('bulk-who-chips', 'b-who');
+    document.getElementById('b-loc').value = '';
+    document.getElementById('b-who').value = '';
+    openModal('m-bulk-out');
   } else {
-    hint.classList.remove('show');
+    // bulk in — confirm
+    if(!confirm(`นำกลับ ${selectedIds.size} รายการที่เลือก?`)) return;
+    const ids = [...selectedIds];
+    const now = new Date();
+    const updates = {};
+    ids.forEach(id => {
+      const t = tools.find(x=>x.id===id);
+      if(!t) return;
+      const updated = {...t, status:'in', location:'', who:'', conditionImg:null, updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
+      updates['tools/'+id] = updated;
+      addHist({ action:'in', toolName:t.name, status:'in' });
+    });
+    db.ref().update(updates);
+    showToast(`✅ นำกลับ ${ids.length} รายการแล้ว`);
+    toggleBulkMode();
   }
 }
 
-function autoAssignNum(){
-  const name=document.getElementById('f-name').value.trim().toLowerCase();
-  if(!name){showToast('⚠️ กรุณาใส่ชื่อเครื่องมือก่อน');return;}
-  const dups=tools.filter(t=>t.name.toLowerCase()===name);
-  const usedNums=dups.map(t=>t.toolNum).filter(Boolean);
-  const intNums=usedNums.map(n=>parseInt(n)).filter(n=>!isNaN(n));
-  let next;
-  if(intNums.length>0){next=(Math.max(...intNums)+1).toString();}
-  else if(dups.length>0){next=(dups.length+1).toString();}
-  else{next='1';}
-  document.getElementById('f-num').value=next;
-  showToast(`✅ ใส่หมายเลข #${next} แล้ว`);
+function confirmBulkOut() {
+  const loc = document.getElementById('b-loc').value.trim();
+  const who = document.getElementById('b-who').value.trim();
+  if(!loc||!who) { showToast('⚠️ กรุณาระบุสถานที่และชื่อช่าง'); return; }
+  const ids = [...selectedIds];
+  const now = new Date();
+  const updates = {};
+  ids.forEach(id => {
+    const t = tools.find(x=>x.id===id);
+    if(!t) return;
+    const updated = {...t, status:'out', location:loc, who, updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
+    updates['tools/'+id] = updated;
+    addHist({ action:'out', toolName:t.name, status:'out', who, location:loc });
+  });
+  db.ref().update(updates);
+  saveRecentWho(who);
+  closeModal('m-bulk-out');
+  showToast(`🚧 นำออก ${ids.length} รายการแล้ว`);
+  toggleBulkMode();
 }
 
-/* ── IMAGE HANDLING ── */
-function compressImg(file,maxW,maxH,q,cb){
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=new Image();
-    img.onload=()=>{
-      let w=img.width,h=img.height;
-      if(w>maxW||h>maxH){const r=Math.min(maxW/w,maxH/h);w=Math.round(w*r);h=Math.round(h*r);}
-      const c=document.createElement('canvas');c.width=w;c.height=h;
+/* ═══════════════════════════════════════════════════════════
+   RECENT WHO (localStorage for quick-fill)
+═══════════════════════════════════════════════════════════ */
+function getRecentWho() {
+  try { return JSON.parse(localStorage.getItem('recentWho')||'[]'); } catch{ return []; }
+}
+function saveRecentWho(name) {
+  let arr = getRecentWho().filter(x=>x!==name);
+  arr.unshift(name);
+  arr = arr.slice(0,5);
+  try { localStorage.setItem('recentWho', JSON.stringify(arr)); } catch{}
+}
+function renderWhoChips(containerId, inputId) {
+  const arr = getRecentWho();
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  if(!arr.length) { el.innerHTML=''; return; }
+  el.innerHTML = arr.map(w =>
+    `<span class="who-chip" onclick="selectWho('${w.replace(/'/g,"\\'")}','${inputId}','${containerId}')">${w}</span>`
+  ).join('');
+}
+function selectWho(name, inputId, containerId) {
+  document.getElementById(inputId).value = name;
+  document.querySelectorAll(`#${containerId} .who-chip`).forEach(c => c.classList.toggle('selected', c.textContent===name));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADD / EDIT / DELETE
+═══════════════════════════════════════════════════════════ */
+function saveTool() {
+  const name = document.getElementById('f-name').value.trim();
+  if(!name) { showToast('⚠️ กรุณาใส่ชื่ออุปกรณ์'); return; }
+  const editId  = document.getElementById('edit-id').value;
+  const existing = editId ? (tools.find(t=>t.id===editId)||{}) : {};
+  const now = new Date();
+  const toolNum = document.getElementById('f-num').value.trim();
+  const tool = {
+    id:        editId || Date.now().toString(),
+    name,
+    toolNum:   toolNum || '',
+    cat:       document.getElementById('f-cat').value,
+    status:    existing.status || 'in',
+    location:  existing.location || '',
+    who:       existing.who || '',
+    note:      document.getElementById('f-note').value.trim(),
+    img:       curImgThumb || existing.img || null,
+    imgFull:   curImgFull  || existing.imgFull || null,
+    conditionImg: existing.conditionImg || null,
+    updatedAt: `${timeStr(now)} ${thaiShort(now)}`
+  };
+  patchTool(tool);
+  addHist({ action: editId?'edit':'in', toolName:name, status:tool.status, note:tool.note });
+  resetForm();
+  showToast('✅ บันทึกสำเร็จ!');
+  switchTab('list');
+}
+
+function editTool(id) {
+  const t = tools.find(x=>x.id===id);
+  if(!t) return;
+  document.getElementById('edit-id').value = t.id;
+  document.getElementById('f-name').value  = t.name;
+  document.getElementById('f-num').value   = t.toolNum || '';
+  document.getElementById('f-cat').value   = t.cat || 'อื่นๆ';
+  document.getElementById('f-note').value  = t.note || '';
+  document.getElementById('form-title').querySelector('span').textContent = 'แก้ไขข้อมูลอุปกรณ์';
+  document.getElementById('btn-cancel-edit').classList.add('show');
+  document.getElementById('num-hint').classList.remove('show');
+  if(t.img) {
+    curImgThumb = t.img; curImgFull = t.imgFull||t.img;
+    const prev = document.getElementById('f-preview');
+    prev.src = t.img; prev.classList.add('show');
+    document.getElementById('upload-area').classList.add('has-img');
+    document.getElementById('upload-ico').style.display = 'none';
+    document.getElementById('upload-txt').textContent = 'แตะเพื่อเปลี่ยนรูป';
+  }
+  switchTab('add');
+}
+
+function cancelEdit() {
+  resetForm();
+  switchTab('list');
+}
+
+function resetForm() {
+  document.getElementById('edit-id').value = '';
+  document.getElementById('f-name').value  = '';
+  document.getElementById('f-num').value   = '';
+  document.getElementById('f-cat').value   = 'อื่นๆ';
+  document.getElementById('f-note').value  = '';
+  document.getElementById('f-img').value   = '';
+  document.getElementById('num-hint').classList.remove('show');
+  const prev = document.getElementById('f-preview');
+  prev.src=''; prev.classList.remove('show');
+  document.getElementById('upload-area').classList.remove('has-img');
+  document.getElementById('upload-ico').style.display = '';
+  document.getElementById('upload-txt').textContent = 'แตะเพื่อเลือกหรือถ่ายรูป';
+  document.getElementById('form-title').querySelector('span').textContent = 'เพิ่มอุปกรณ์ใหม่';
+  document.getElementById('btn-cancel-edit').classList.remove('show');
+  curImgThumb = null; curImgFull = null;
+}
+
+function deleteTool(id) {
+  if(!confirm('ลบอุปกรณ์นี้?')) return;
+  const t = tools.find(x=>x.id===id);
+  if(t) addHist({ action:'del', toolName:t.name, status:t.status, who:t.who, location:t.location });
+  removeTool(id);
+  showToast('🗑️ ลบแล้ว');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   IMAGE HANDLING
+═══════════════════════════════════════════════════════════ */
+function compressImg(file, maxW, maxH, q, cb) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      let w=img.width, h=img.height;
+      if(w>maxW||h>maxH) { const r=Math.min(maxW/w,maxH/h); w=Math.round(w*r); h=Math.round(h*r); }
+      const c = document.createElement('canvas');
+      c.width=w; c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);
       cb(c.toDataURL('image/jpeg',q));
     };
-    img.src=e.target.result;
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-function handleImg(input){
-  const file=input.files[0];if(!file)return;
+function handleImg(input) {
+  const file = input.files[0]; if(!file) return;
   showToast('⏳ กำลังประมวลผลรูป...');
-  compressImg(file,200,200,0.72,thumb=>{
-    compressImg(file,900,900,0.78,full=>{
-      curImgThumb=thumb;curImgFull=full;
-      const prev=document.getElementById('f-preview');
-      prev.src=thumb;prev.classList.add('show');
+  compressImg(file, 200, 200, 0.72, thumb => {
+    compressImg(file, 900, 900, 0.78, full => {
+      curImgThumb=thumb; curImgFull=full;
+      const prev = document.getElementById('f-preview');
+      prev.src=thumb; prev.classList.add('show');
       document.getElementById('upload-area').classList.add('has-img');
       document.getElementById('upload-ico').style.display='none';
       document.getElementById('upload-txt').textContent='แตะเพื่อเปลี่ยนรูป';
@@ -889,13 +1393,13 @@ function handleImg(input){
   });
 }
 
-function handleOutPhoto(input){
-  const file=input.files[0];if(!file)return;
+function handleOutPhoto(input) {
+  const file = input.files[0]; if(!file) return;
   showToast('⏳ กำลังประมวลผลรูป...');
-  compressImg(file,900,900,0.78,data=>{
-    curCondImg=data;
-    const prev=document.getElementById('out-photo-preview');
-    prev.src=data;prev.classList.add('show');
+  compressImg(file, 900, 900, 0.78, data => {
+    curCondImg = data;
+    const prev = document.getElementById('out-photo-preview');
+    prev.src=data; prev.classList.add('show');
     document.getElementById('out-photo-area').classList.add('has-img');
     document.getElementById('out-photo-ico').style.display='none';
     document.getElementById('out-photo-txt').style.display='none';
@@ -904,7 +1408,7 @@ function handleOutPhoto(input){
   });
 }
 
-function removeOutPhoto(e){
+function removeOutPhoto(e) {
   e.stopPropagation();
   curCondImg=null;
   document.getElementById('out-photo-preview').src='';
@@ -915,43 +1419,338 @@ function removeOutPhoto(e){
   document.getElementById('out-photo-remove').classList.remove('show');
   document.getElementById('o-img').value='';
 }
-
-function resetOutPhoto(){
+function resetOutPhoto() {
   curCondImg=null;
-  document.getElementById('out-photo-preview').src='';
-  document.getElementById('out-photo-preview').classList.remove('show');
-  document.getElementById('out-photo-area').classList.remove('has-img');
-  document.getElementById('out-photo-ico').style.display='';
-  document.getElementById('out-photo-txt').style.display='';
-  document.getElementById('out-photo-remove').classList.remove('show');
-  const inp=document.getElementById('o-img');if(inp)inp.value='';
+  ['out-photo-preview','out-photo-area','out-photo-ico','out-photo-txt','out-photo-remove'].forEach(id=>{
+    const el=document.getElementById(id); if(!el)return;
+    if(id==='out-photo-preview'){el.src='';el.classList.remove('show');}
+    else if(id==='out-photo-area') el.classList.remove('has-img');
+    else if(id==='out-photo-remove') el.classList.remove('show');
+    else el.style.display='';
+  });
+  const inp=document.getElementById('o-img'); if(inp) inp.value='';
 }
 
-/* ── HISTORY ── */
-function setHistFilter(f,el){
-  histFilter=f;
-  document.querySelectorAll('.hist-chip').forEach(c=>c.classList.toggle('active',c.dataset.hf===f));
+/* ═══════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════ */
+function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow='hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); document.body.style.overflow=''; activeId=null; }
+
+function openOutModal(id) {
+  const t = tools.find(x=>x.id===id); if(!t) return;
+  activeId = id;
+  document.getElementById('m-out-name').textContent = '🔧 '+t.name+(t.toolNum?` #${t.toolNum}`:'');
+  document.getElementById('o-loc').value  = t.location||'';
+  document.getElementById('o-who').value  = t.who||'';
+  document.getElementById('o-note').value = t.note||'';
+  resetOutPhoto();
+  renderWhoChips('out-who-chips','o-who');
+  openModal('m-out');
+  setTimeout(()=>document.getElementById('o-loc').focus(),300);
+}
+
+function confirmOut() {
+  const loc = document.getElementById('o-loc').value.trim();
+  const who = document.getElementById('o-who').value.trim();
+  if(!loc||!who) { showToast('⚠️ กรุณาระบุสถานที่และชื่อช่าง'); return; }
+  const t = tools.find(x=>x.id===activeId); if(!t) return;
+  const now = new Date();
+  const updated = {...t, status:'out', location:loc, who, note:document.getElementById('o-note').value.trim(),
+    conditionImg: curCondImg||t.conditionImg||null,
+    updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
+  patchTool(updated);
+  addHist({action:'out', toolName:t.name, status:'out', who, location:loc, note:updated.note});
+  saveRecentWho(who);
+  closeModal('m-out');
+  showToast('🚧 นำออกแล้ว');
+}
+
+function openInModal(id) {
+  const t = tools.find(x=>x.id===id); if(!t) return;
+  activeId = id;
+  document.getElementById('m-in-name').textContent = `🔧 ${t.name}${t.toolNum?' #'+t.toolNum:''}${t.location?'  ·  📍 '+t.location:''}${t.who?'  ·  👤 '+t.who:''}`;
+  openModal('m-in');
+}
+
+function confirmIn() {
+  const t = tools.find(x=>x.id===activeId); if(!t) return;
+  const now = new Date();
+  const updated = {...t, status:'in', location:'', who:'', conditionImg:null, updatedAt:`${timeStr(now)} ${thaiShort(now)}`};
+  patchTool(updated);
+  addHist({action:'in', toolName:t.name, status:'in'});
+  closeModal('m-in');
+  showToast('✅ นำกลับแล้ว');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SUMMARY
+═══════════════════════════════════════════════════════════ */
+function renderSummary() {
+  const inT  = tools.filter(t=>t.status==='in');
+  const outT = tools.filter(t=>t.status==='out');
+  document.getElementById('sum-sub').textContent = `ทั้งหมด ${tools.length} รายการ · ในออฟฟิศ ${inT.length} · นำออก ${outT.length}`;
+  document.getElementById('sum-empty').style.display = tools.length?'none':'block';
+
+  const mkRow = t => `
+    <div class="sum-row">
+      <div class="sum-row-img">
+        ${t.img ? `<img src="${t.img}" loading="lazy" onclick="openLbox('${(t.imgFull||t.img).replace(/'/g,"\\'")}')">` : catEmoji(t.cat||'')}
+      </div>
+      <div>
+        <div class="sum-row-name">${t.name}${t.toolNum?` <span style="font-size:11px;background:rgba(88,166,255,.15);color:#58A6FF;border:1px solid rgba(88,166,255,.3);border-radius:5px;padding:1px 6px;margin-left:3px;">#${t.toolNum}</span>`:''}</div>
+        <div class="sum-row-loc">
+          ${t.status==='in' ? '✅ ในออฟฟิศ' : `🚧 ${t.location||''}${t.who?' · 👤 '+t.who:''}`}
+        </div>
+        ${t.note?`<div class="sum-row-loc">📝 ${t.note}</div>`:''}
+      </div>
+    </div>`;
+
+  document.getElementById('sum-in').innerHTML = inT.length ? `
+    <div class="sum-section-title"><span class="sum-dot" style="background:var(--green)"></span>อยู่ในออฟฟิศ (${inT.length})</div>
+    ${inT.map(mkRow).join('')}<div style="height:10px"></div>` : '';
+
+  document.getElementById('sum-out').innerHTML = outT.length ? `
+    <div class="sum-section-title"><span class="sum-dot" style="background:var(--orange)"></span>นำออกจากออฟฟิศ (${outT.length})</div>
+    ${outT.map(mkRow).join('')}` : '';
+}
+
+function doShot() {
+  showToast('⏳ กำลังสร้างภาพ...');
+  html2canvas(document.getElementById('snap-area'), { scale:2, useCORS:true, backgroundColor:'#0D1117' }).then(canvas => {
+    canvas.toBlob(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href=url; a.download=`อุปกรณ์_${slashDate().replace(/\//g,'-')}.png`; a.click();
+      showToast('✅ บันทึกรูปแล้ว! ส่ง LINE ได้เลย');
+    });
+  });
+}
+
+function copyText() {
+  const inT  = tools.filter(t=>t.status==='in');
+  const outT = tools.filter(t=>t.status==='out');
+  let txt = `⚡ สรุปอุปกรณ์ช่างไฟฟ้า\n📅 ${thaiLong()}\n━━━━━━━━━━━━━━\n`;
+  if(inT.length)  { txt += `\n✅ ในออฟฟิศ (${inT.length} รายการ)\n`; inT.forEach(t=>{txt+=`  • ${t.name}${t.toolNum?' #'+t.toolNum:''}\n`;}); }
+  if(outT.length) { txt += `\n🚧 นำออก (${outT.length} รายการ)\n`; outT.forEach(t=>{txt+=`  • ${t.name}${t.toolNum?' #'+t.toolNum:''}\n    📍 ${t.location||'-'} | 👤 ${t.who||'-'}\n`;}); }
+  txt += `━━━━━━━━━━━━━━\nรวม ${tools.length} รายการ`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('✅ คัดลอกแล้ว! วางใน LINE ได้เลย'));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT EXCEL — HTML table → .xls (Excel-compatible, pastel colors)
+═══════════════════════════════════════════════════════════ */
+function exportExcel() {
+  if(!tools.length) { showToast('⚠️ ยังไม่มีข้อมูลอุปกรณ์'); return; }
+  showToast('⏳ กำลังสร้าง Excel...');
+
+  /* ── pastel color map ── */
+  const C = {
+    title:   '#FFB3C6', // ชมพู
+    dateRow: '#FFF9C4', // เหลืองอ่อน
+    hdrCat:  '#C7CEEA', // ลาเวนเดอร์
+    hdrOut:  '#FFDAC1', // ส้มอ่อน
+    hdrIn:   '#B5EAD7', // มิ้นท์
+    rowIn1:  '#E8F8F0', rowIn2:  '#F5FDF9',
+    rowOut1: '#FFF3E8', rowOut2: '#FFF8F2',
+    catColors: ['#FFD6D6','#FFE8C8','#FFFAC8','#D6F5D6','#C8E8FF','#E8D6FF','#FFD6F0','#D6F0FF','#EBEBEB']
+  };
+
+  const s = (bg, bold=false, size=10, align='left', color='#222') =>
+    `background:${bg};font-family:Tahoma,sans-serif;font-size:${size}pt;`+
+    (bold?'font-weight:bold;':'')+ `text-align:${align};color:${color};`+
+    'border:1px solid #D0D0D0;padding:4px 8px;vertical-align:middle;white-space:nowrap;';
+
+  /* ════ SHEET 1 — ภาพรวม ════ */
+  function sheet1() {
+    const inN  = tools.filter(t=>t.status==='in').length;
+    const outN = tools.filter(t=>t.status==='out').length;
+    const sorted = [...tools].sort((a,b)=>{
+      if(a.status==='out'&&b.status!=='out') return -1;
+      if(a.status!=='out'&&b.status==='out') return 1;
+      return a.name.localeCompare(b.name,'th');
+    });
+
+    const hdrs = ['ลำดับ','ชื่ออุปกรณ์','หมายเลข #','หมวดหมู่','สถานะ','สถานที่ / งาน','ผู้นำออก','หมายเหตุ','อัปเดตล่าสุด'];
+    const rows = sorted.map((t,i)=>{
+      const isOut = t.status==='out';
+      const bg = i%2===0 ? (isOut?C.rowOut1:C.rowIn1) : (isOut?C.rowOut2:C.rowIn2);
+      return `<tr>
+        <td style="${s(bg,true,9,'center')}">${i+1}</td>
+        <td style="${s(bg,true,10)}">${esc(t.name)}${t.toolNum?` <span style="color:#3B82F6;font-size:9pt">#${esc(t.toolNum)}</span>`:''}</td>
+        <td style="${s(bg,false,9,'center')}">${esc(t.toolNum||'')}</td>
+        <td style="${s(bg,false,9)}">${esc(t.cat||'อื่นๆ')}</td>
+        <td style="${s(isOut?C.rowOut1:C.rowIn1,true,9,'center',isOut?'#C05000':'#15803D')}">${isOut?'🚧 นำออก':'✅ ในออฟฟิศ'}</td>
+        <td style="${s(bg,false,9)}">${esc(t.location||'')}</td>
+        <td style="${s(bg,false,9)}">${esc(t.who||'')}</td>
+        <td style="${s(bg,false,9)}">${esc(t.note||'')}</td>
+        <td style="${s(bg,false,8,'center','#888')}">${esc(t.updatedAt||'')}</td>
+      </tr>`;
+    }).join('');
+
+    return `<table>
+      <tr><td colspan="9" style="${s(C.title,true,14,'center')}">⚡ ToolTrack — สรุปอุปกรณ์ช่างไฟฟ้า</td></tr>
+      <tr><td colspan="9" style="${s(C.dateRow,true,10)}">📅 ${thaiLong()}   |   รวม ${tools.length} รายการ  ·  ✅ ในออฟฟิศ ${inN} รายการ  ·  🚧 นำออก ${outN} รายการ</td></tr>
+      <tr>${hdrs.map(h=>`<td style="${s(C.hdrCat,true,10,'center')}">${h}</td>`).join('')}</tr>
+      ${rows}
+    </table>`;
+  }
+
+  /* ════ SHEET 2 — แยกหมวดหมู่ ════ */
+  function sheet2() {
+    const catOrder = categories.map(c=>c.name);
+    const grouped = {};
+    tools.forEach(t=>{ const k=t.cat||'อื่นๆ'; (grouped[k]=grouped[k]||[]).push(t); });
+    Object.keys(grouped).forEach(k=>{ if(!catOrder.includes(k)) catOrder.push(k); });
+
+    let rows = '';
+    let ci = 0;
+    catOrder.forEach(catName=>{
+      const items = grouped[catName]; if(!items||!items.length) return;
+      const catObj = categories.find(c=>c.name===catName)||{emoji:'📦'};
+      const hBg = C.catColors[ci++ % C.catColors.length];
+      const inCnt = items.filter(t=>t.status==='in').length;
+      const outCnt = items.filter(t=>t.status==='out').length;
+
+      rows += `<tr><td colspan="7" style="${s(hBg,true,11)}">${catObj.emoji||'📦'} ${esc(catName)}  (${items.length} รายการ · ✅ ในออฟฟิศ ${inCnt} · 🚧 นำออก ${outCnt})</td></tr>`;
+      rows += `<tr>${['ลำดับ','ชื่ออุปกรณ์','หมายเลข #','สถานะ','สถานที่','ผู้นำออก','หมายเหตุ'].map(h=>`<td style="${s(C.hdrCat,true,9,'center')}">${h}</td>`).join('')}</tr>`;
+
+      const sorted = [...items].sort((a,b)=>{
+        if(a.status==='out'&&b.status!=='out') return -1;
+        if(a.status!=='out'&&b.status==='out') return 1;
+        return a.name.localeCompare(b.name,'th');
+      });
+      sorted.forEach((t,i)=>{
+        const isOut = t.status==='out';
+        const bg = i%2===0 ? (isOut?C.rowOut1:C.rowIn1) : (isOut?C.rowOut2:C.rowIn2);
+        rows += `<tr>
+          <td style="${s(bg,true,9,'center')}">${i+1}</td>
+          <td style="${s(bg,true,10)}">${esc(t.name)}</td>
+          <td style="${s(bg,false,9,'center')}">${esc(t.toolNum||'')}</td>
+          <td style="${s(isOut?C.rowOut1:C.rowIn1,true,9,'center',isOut?'#C05000':'#15803D')}">${isOut?'🚧 นำออก':'✅ ในออฟฟิศ'}</td>
+          <td style="${s(bg,false,9)}">${esc(t.location||'')}</td>
+          <td style="${s(bg,false,9)}">${esc(t.who||'')}</td>
+          <td style="${s(bg,false,9)}">${esc(t.note||'')}</td>
+        </tr>`;
+      });
+      rows += `<tr><td colspan="7" style="background:#fff;border:none;height:8px"></td></tr>`;
+    });
+
+    return `<table>
+      <tr><td colspan="7" style="${s(C.title,true,14,'center')}">📦 อุปกรณ์จำแนกตามหมวดหมู่</td></tr>
+      <tr><td colspan="7" style="${s(C.dateRow,true,10)}">📅 ${thaiLong()}   |   รวม ${tools.length} รายการ</td></tr>
+      <tr><td colspan="7" style="background:#fff;border:none;height:6px"></td></tr>
+      ${rows}
+    </table>`;
+  }
+
+  /* ════ SHEET 3 — อุปกรณ์นำออก ════ */
+  function sheet3() {
+    const outT = tools.filter(t=>t.status==='out');
+    const sorted = [...outT].sort((a,b)=>(a.location||'').localeCompare(b.location||'','th')||a.name.localeCompare(b.name,'th'));
+    const hdrs = ['ลำดับ','ชื่ออุปกรณ์','หมวดหมู่','หมายเลข #','สถานที่ / งาน','ผู้นำออก','หมายเหตุ'];
+
+    const rows = outT.length ? sorted.map((t,i)=>{
+      const bg = i%2===0 ? C.rowOut1 : C.rowOut2;
+      return `<tr>
+        <td style="${s(bg,true,9,'center')}">${i+1}</td>
+        <td style="${s(bg,true,10)}">${esc(t.name)}${t.toolNum?` <span style="color:#3B82F6;font-size:9pt">#${esc(t.toolNum)}</span>`:''}</td>
+        <td style="${s(bg,false,9)}">${esc(t.cat||'อื่นๆ')}</td>
+        <td style="${s(bg,false,9,'center')}">${esc(t.toolNum||'')}</td>
+        <td style="${s(bg,false,9)}">${esc(t.location||'-')}</td>
+        <td style="${s(bg,true,9)}">${esc(t.who||'-')}</td>
+        <td style="${s(bg,false,9)}">${esc(t.note||'')}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="7" style="${s('#F0FFF4',true,10,'center','#15803D')}">✅ ไม่มีอุปกรณ์ที่นำออกในขณะนี้</td></tr>`;
+
+    return `<table>
+      <tr><td colspan="7" style="${s(C.hdrOut,true,14,'center')}">🚧 อุปกรณ์ที่นำออกจากออฟฟิศ</td></tr>
+      <tr><td colspan="7" style="${s(C.dateRow,true,10)}">📅 ${thaiLong()}   |   นำออก ${outT.length} รายการ</td></tr>
+      <tr>${hdrs.map(h=>`<td style="${s(C.hdrOut,true,10,'center')}">${h}</td>`).join('')}</tr>
+      ${rows}
+    </table>`;
+  }
+
+  function esc(v) {
+    return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Build multi-sheet workbook as XML Spreadsheet 2003 ── */
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+<Styles>
+  <Style ss:ID="Default"><Alignment ss:WrapText="1"/><Font ss:FontName="Tahoma" ss:Size="10"/></Style>
+</Styles>
+${buildXLSSheet('ภาพรวมทั้งหมด', sheet1())}
+${buildXLSSheet('จำแนกหมวดหมู่', sheet2())}
+${buildXLSSheet('อุปกรณ์ที่นำออก', sheet3())}
+</Workbook>`;
+
+  function buildXLSSheet(name, htmlTable) {
+    return `<Worksheet ss:Name="${name}"><Table>${htmlTable}</Table></Worksheet>`;
+  }
+
+  // Use Blob with Excel MIME — HTML tables inside xls work great
+  const htmlDoc = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets>
+<x:ExcelWorksheet><x:Name>ภาพรวมทั้งหมด</x:Name><x:WorksheetOptions><x:Selected/></x:WorksheetOptions></x:ExcelWorksheet>
+<x:ExcelWorksheet><x:Name>จำแนกหมวดหมู่</x:Name></x:ExcelWorksheet>
+<x:ExcelWorksheet><x:Name>อุปกรณ์ที่นำออก</x:Name></x:ExcelWorksheet>
+</x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+</head><body>
+${sheet1()}
+<br clear="all" style="mso-special-character:line-break;page-break-before:always">
+${sheet2()}
+<br clear="all" style="mso-special-character:line-break;page-break-before:always">
+${sheet3()}
+</body></html>`;
+
+  const blob = new Blob(['\uFEFF'+htmlDoc], { type:'application/vnd.ms-excel;charset=utf-8' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `อุปกรณ์ช่างไฟฟ้า_${slashDate().replace(/\//g,'-')}.xls`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+  showToast('✅ ดาวน์โหลด Excel สำเร็จ!');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════════════════════ */
+function setHistFilter(f, el) {
+  histFilter = f;
+  document.querySelectorAll('.hist-chip').forEach(c=>c.classList.toggle('active', c.dataset.hf===f));
   renderHistory();
 }
 
-function renderHistory(){
-  const list=document.getElementById('history-list');
-  const data=histFilter==='all'?historyData:historyData.filter(h=>h.action===histFilter);
-  if(!data.length){
+function renderHistory() {
+  const list = document.getElementById('history-list');
+  const data = histFilter==='all' ? historyData : historyData.filter(h=>h.action===histFilter);
+  if(!data.length) {
     list.innerHTML='<div class="empty"><div class="empty-ico">📜</div><div class="empty-txt">ยังไม่มีประวัติ</div></div>';
     return;
   }
-  const MAP={
-    out:{ico:'🚧',lbl:'หยิบใช้งาน',cls:'h-out'},
-    in:{ico:'✅',lbl:'คืนเครื่องมือ',cls:'h-in'},
-    add:{ico:'➕',lbl:'เพิ่มเครื่องมือใหม่',cls:'h-add'},
-    edit:{ico:'✏️',lbl:'แก้ไขข้อมูล',cls:''},
-    del:{ico:'🗑️',lbl:'ลบเครื่องมือ',cls:''},
+  const MAP = {
+    out:  {ico:'🚧',lbl:'นำออกจากออฟฟิศ', cls:'h-out'},
+    in:   {ico:'✅',lbl:'นำกลับเข้าออฟฟิศ',cls:'h-in'},
+    edit: {ico:'✏️',lbl:'แก้ไขข้อมูล',      cls:'h-edit'},
+    del:  {ico:'🗑️',lbl:'ลบอุปกรณ์',        cls:'h-del'}
   };
-  list.innerHTML=data.map(h=>{
-    const a=MAP[h.action]||{ico:'📝',lbl:h.action,cls:''};
-    const detail=[h.who&&`👤 ${h.who}`,h.location&&`📍 ${h.location}`,h.note&&`📝 ${h.note}`].filter(Boolean);
-    return`
+  list.innerHTML = data.map(h => {
+    const a = MAP[h.action]||{ico:'📝',lbl:h.action,cls:''};
+    const detail = [h.who&&`👤 ${h.who}`, h.location&&`📍 ${h.location}`, h.note&&`📝 ${h.note}`].filter(Boolean);
+    return `
     <div class="hist-item ${a.cls}">
       <div class="hist-ico">${a.ico}</div>
       <div class="hist-body">
@@ -966,57 +1765,309 @@ function renderHistory(){
   }).join('');
 }
 
-/* ── CATEGORIES ── */
-function rebuildCatUI(){
-  const sel=document.getElementById('f-cat');
-  if(!sel)return;
-  const cur=sel.value;
-  sel.innerHTML=categories.map(c=>`<option value="${c.name}">${c.emoji} ${c.name}</option>`).join('');
-  if(cur&&categories.find(c=>c.name===cur))sel.value=cur;
-  else sel.value='อื่นๆ';
-
-  const fc=document.getElementById('filter-chips');
-  if(!fc)return;
-  const catChips=categories.map(c=>
-    `<span class="chip" data-filter="cat-${c.name}" onclick="setFilter('cat-${c.name}',this)">${c.emoji} ${c.name}</span>`
-  ).join('');
-  fc.innerHTML=`
-    <span class="chip ${curFilter==='all'?'active':''}" data-filter="all" onclick="setFilter('all',this)">ทั้งหมด</span>
-    <span class="chip ${curFilter==='in'?'active':''}" data-filter="in" onclick="setFilter('in',this)">✅ ในออฟฟิศ</span>
-    <span class="chip ${curFilter==='out'?'active':''}" data-filter="out" onclick="setFilter('out',this)">🚧 นำออก</span>
-    ${catChips}`;
-  fc.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active',c.dataset.filter===curFilter));
+function clearHistory() {
+  if(!confirm('ล้างประวัติทั้งหมด?')) return;
+  historyRef.remove();
+  showToast('🗑️ ล้างประวัติแล้ว');
 }
 
-/* ── UI UTILS ── */
-let toastTimer;
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+/* ═══════════════════════════════════════════════════════════
+   UI UTILS
+═══════════════════════════════════════════════════════════ */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2600);
 }
-function flashSync(){
-  const ring=document.getElementById('sync-ring');
+
+function flashSync() {
+  const ring = document.getElementById('sync-ring');
   ring.classList.add('pulse');
   setTimeout(()=>ring.classList.remove('pulse'),1200);
 }
-function openLbox(src){
+
+function openLbox(src) {
   document.getElementById('lbox-img').src=src;
   document.getElementById('lbox').classList.add('open');
   document.body.style.overflow='hidden';
 }
-function closeLbox(){
+function closeLbox() {
   document.getElementById('lbox').classList.remove('open');
   document.getElementById('lbox-img').src='';
   document.body.style.overflow='';
 }
 
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeLbox();['m-out','m-in'].forEach(closeModal);}
+/* ═══════════════════════════════════════════════════════════
+   PWA
+═══════════════════════════════════════════════════════════ */
+let deferredPrompt = null;
+if('serviceWorker' in navigator) { window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{})); }
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt=e;
+  if(!localStorage.getItem('pwa-dismissed')) document.getElementById('pwa-bar').classList.add('show');
 });
+document.getElementById('btn-pwa-install').addEventListener('click', async ()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if(outcome==='accepted') { document.getElementById('pwa-bar').classList.remove('show'); showToast('✅ ติดตั้งแอปสำเร็จ!'); }
+  deferredPrompt=null;
+});
+function dismissPwa() { document.getElementById('pwa-bar').classList.remove('show'); localStorage.setItem('pwa-dismissed','1'); }
+window.addEventListener('appinstalled',()=>{ document.getElementById('pwa-bar').classList.remove('show'); deferredPrompt=null; });
+
+/* ═══════════════════════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if(e.key==='Escape') { closeLbox(); ['m-out','m-in','m-bulk-out'].forEach(closeModal); }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT PDF — 1 หน้าต่ออุปกรณ์ A4
+═══════════════════════════════════════════════════════════ */
+async function exportPDF() {
+  if(!tools.length) { showToast('⚠️ ยังไม่มีอุปกรณ์'); return; }
+  const { jsPDF } = window.jspdf;
+
+  const overlay = document.getElementById('pdf-overlay');
+  const bar     = document.getElementById('pdf-bar');
+  const txt     = document.getElementById('pdf-txt');
+  const ctr     = document.getElementById('pdf-ctr');
+  overlay.classList.add('show');
+  bar.style.width = '0%';
+
+  const A4W = 794, A4H = 1123;
+  const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+
+  const container = document.createElement('div');
+  container.style.cssText = `position:fixed;left:-9999px;top:0;width:${A4W}px;background:#0D1117;font-family:'IBM Plex Sans Thai',sans-serif;z-index:-1;`;
+  document.body.appendChild(container);
+
+  const dateStr = thaiShort();
+
+  for(let i = 0; i < tools.length; i++) {
+    const t   = tools[i];
+    const pct = Math.round((i / tools.length) * 100);
+    bar.style.width = pct + '%';
+    txt.textContent = `กำลังสร้าง PDF... ${pct}%`;
+    ctr.textContent = `หน้า ${i+1} / ${tools.length}`;
+
+    const isOut      = t.status === 'out';
+    const statusClr  = isOut ? '#F77F00' : '#3DD68C';
+    const statusBg   = isOut ? 'rgba(247,127,0,.12)' : 'rgba(61,214,140,.12)';
+    const statusLbl  = isOut ? '🚧 นำออกจากออฟฟิศ' : '✅ อยู่ในออฟฟิศ';
+
+    const imgHtml = (t.imgFull||t.img)
+      ? `<div style="display:flex;justify-content:center;margin-bottom:24px;">
+           <img src="${t.imgFull||t.img}" style="max-width:320px;max-height:320px;border-radius:16px;object-fit:cover;box-shadow:0 4px 24px rgba(0,0,0,.5);" crossorigin="anonymous">
+         </div>`
+      : `<div style="display:flex;justify-content:center;margin-bottom:24px;">
+           <div style="width:180px;height:180px;background:#1C2333;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:72px;">${catEmoji(t.cat||'')}</div>
+         </div>`;
+
+    const condHtml = (isOut && t.conditionImg)
+      ? `<div style="margin-top:16px;padding:14px;background:rgba(247,127,0,.07);border-radius:12px;border:1px solid rgba(247,127,0,.2);">
+           <div style="font-size:11px;color:#F77F00;font-weight:700;margin-bottom:8px;">📸 รูปสภาพก่อนนำออก</div>
+           <div style="display:flex;justify-content:center;">
+             <img src="${t.conditionImg}" style="max-width:280px;max-height:200px;border-radius:10px;object-fit:cover;" crossorigin="anonymous">
+           </div>
+         </div>` : '';
+
+    const detailRows = isOut ? `
+      <div style="display:flex;gap:10px;margin-bottom:10px;align-items:flex-start;">
+        <span style="font-size:15px;">📍</span>
+        <div><div style="font-size:10px;color:#7D8590;font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">สถานที่ / งาน</div>
+        <div style="font-size:15px;font-weight:700;color:#E6EDF3;">${t.location||'-'}</div></div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:15px;">👤</span>
+        <div><div style="font-size:10px;color:#7D8590;font-weight:700;margin-bottom:2px;text-transform:uppercase;letter-spacing:.5px;">ช่างที่นำออก</div>
+        <div style="font-size:15px;font-weight:700;color:#E6EDF3;">${t.who||'-'}</div></div>
+      </div>` : `
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:15px;">🏢</span>
+        <div style="font-size:15px;font-weight:700;color:#3DD68C;">อยู่ในออฟฟิศ พร้อมใช้งาน</div>
+      </div>`;
+
+    container.innerHTML = `
+    <div style="padding:36px 40px 32px;min-height:${A4H}px;display:flex;flex-direction:column;background:#0D1117;">
+      <!-- Header bar -->
+      <div style="background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <div style="color:#E6EDF3;font-size:16px;font-weight:700;">⚡ ToolTrack — อุปกรณ์ช่างไฟฟ้า</div>
+        <div style="color:#F0C040;font-size:12px;font-weight:600;background:rgba(240,192,64,.12);padding:4px 10px;border-radius:20px;">${dateStr}</div>
+      </div>
+      <!-- Card -->
+      <div style="background:#161B22;border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:30px 28px;flex:1;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:-10px;top:-10px;font-size:90px;opacity:.04;">⚡</div>
+        <div style="text-align:right;font-size:10px;color:#7D8590;margin-bottom:16px;">${i+1} / ${tools.length}</div>
+        ${imgHtml}
+        <div style="font-size:11px;color:#7D8590;font-weight:600;text-align:center;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px;">${t.cat||'อื่นๆ'}</div>
+        <div style="text-align:center;font-size:24px;font-weight:700;color:#E6EDF3;margin-bottom:4px;">${t.name}${t.toolNum ? `<span style="font-size:14px;background:rgba(88,166,255,.15);color:#58A6FF;border:1px solid rgba(88,166,255,.3);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle;">#${t.toolNum}</span>` : ''}</div>
+        <div style="text-align:center;margin-bottom:20px;">
+          <span style="display:inline-block;padding:7px 18px;border-radius:30px;background:${statusBg};color:${statusClr};font-size:13px;font-weight:700;border:1px solid ${statusClr}40;">${statusLbl}</span>
+        </div>
+        <div style="background:#0D1117;border-radius:12px;padding:16px 18px;">
+          ${detailRows}
+          ${t.note ? `<div style="margin-top:10px;display:flex;gap:8px;align-items:flex-start;"><span>📝</span><div style="font-size:13px;color:#B1BAC4;">${t.note}</div></div>` : ''}
+          ${t.updatedAt ? `<div style="margin-top:12px;font-size:10px;color:#7D8590;text-align:right;">💾 อัปเดตล่าสุด ${t.updatedAt}</div>` : ''}
+        </div>
+        ${condHtml}
+      </div>
+    </div>`;
+
+    const imgs = container.querySelectorAll('img');
+    await Promise.all(Array.from(imgs).map(img =>
+      img.complete ? Promise.resolve() : new Promise(r => { img.onload=r; img.onerror=r; })
+    ));
+    await new Promise(r => setTimeout(r, 280));
+
+    const isMobile = window.innerWidth < 768;
+    const canvas = await html2canvas(container.firstElementChild, {
+      scale: isMobile ? 1.5 : 2, useCORS:true, allowTaint:true,
+      backgroundColor:'#0D1117', width:A4W, height:A4H, logging:false
+    });
+    const imgData = canvas.toDataURL('image/jpeg', isMobile ? 0.80 : 0.88);
+    canvas.width=0; canvas.height=0;
+    if(i > 0) pdf.addPage();
+    pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+  }
+
+  document.body.removeChild(container);
+  bar.style.width = '100%';
+  txt.textContent = '✅ เสร็จสิ้น! กำลังดาวน์โหลด...';
+  await new Promise(r => setTimeout(r, 400));
+
+  pdf.save(`อุปกรณ์ช่างไฟฟ้า_${slashDate().replace(/\//g,'-')}.pdf`);
+  overlay.classList.remove('show');
+  showToast(`✅ บันทึก PDF สำเร็จ! ${tools.length} หน้า`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CATEGORY MANAGEMENT
+═══════════════════════════════════════════════════════════ */
+function rebuildCatUI() {
+  // Rebuild select dropdown
+  const sel = document.getElementById('f-cat');
+  if(!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = categories.map(c =>
+    `<option value="${c.name}">${c.emoji} ${c.name}</option>`
+  ).join('');
+  // Restore selected value if still exists
+  if(cur && categories.find(c => c.name === cur)) sel.value = cur;
+  else sel.value = 'อื่นๆ';
+
+  // Rebuild filter chips (keep first 3 fixed: all, in, out)
+  const fc = document.getElementById('filter-chips');
+  const catChips = categories.map(c =>
+    `<span class="chip" data-filter="cat-${c.name}" onclick="setFilter('cat-${c.name}',this)">${c.emoji} ${c.name}</span>`
+  ).join('');
+  fc.innerHTML = `
+    <span class="chip ${curFilter==='all'?'active':''}" data-filter="all" onclick="setFilter('all',this)">ทั้งหมด</span>
+    <span class="chip ${curFilter==='in'?'active':''}" data-filter="in"  onclick="setFilter('in',this)">✅ ในออฟฟิศ</span>
+    <span class="chip ${curFilter==='out'?'active':''}" data-filter="out" onclick="setFilter('out',this)">🚧 นำออก</span>
+    ${catChips}
+  `;
+  // Re-mark active chip
+  fc.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.filter === curFilter));
+}
+
+function renderCatList() {
+  const el = document.getElementById('cat-list');
+  if(!el) return;
+  if(!categories.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-ico">🏷️</div><div class="empty-txt">ยังไม่มีหมวดหมู่</div></div>';
+    return;
+  }
+  el.innerHTML = categories.map(c => {
+    const count = tools.filter(t => t.cat === c.name).length;
+    const isDef = !!c.isDefault;
+    return `
+    <div class="cat-item${isDef?' default':''}">
+      <div class="cat-item-ico">${c.emoji}</div>
+      <div class="cat-item-name">${c.name}</div>
+      <div class="cat-item-count">${count} ชิ้น</div>
+      <button class="cat-item-del" onclick="deleteCategory('${c.name}')" ${isDef?'disabled title="หมวดหมู่พื้นฐาน ลบไม่ได้"':''}>
+        ${isDef ? '🔒' : '🗑️ ลบ'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function saveCategory() {
+  const emoji = document.getElementById('c-emoji').value.trim() || '📦';
+  const name  = document.getElementById('c-name').value.trim();
+  if(!name) { showToast('⚠️ กรุณาใส่ชื่อหมวดหมู่'); return; }
+  if(categories.find(c => c.name === name)) { showToast('⚠️ มีหมวดหมู่นี้อยู่แล้ว'); return; }
+  const key = name.replace(/[^a-zA-Zก-๙0-9]/g,'_') + '_' + Date.now();
+  catsRef.child(key).set({ name, emoji, isDefault:false, key });
+  document.getElementById('c-emoji').value = '';
+  document.getElementById('c-name').value  = '';
+  showToast(`✅ เพิ่มหมวดหมู่ "${name}" แล้ว`);
+}
+
+function deleteCategory(name) {
+  const cat = categories.find(c => c.name === name);
+  if(!cat || cat.isDefault) return;
+  const count = tools.filter(t => t.cat === name).length;
+  const msg = count > 0
+    ? `ลบหมวดหมู่ "${name}"?\nมีอุปกรณ์ ${count} ชิ้นในหมวดนี้ จะถูกย้ายเป็น "อื่นๆ"`
+    : `ลบหมวดหมู่ "${name}"?`;
+  if(!confirm(msg)) return;
+  // Move tools in this category to อื่นๆ
+  if(count > 0) {
+    const updates = {};
+    tools.filter(t => t.cat === name).forEach(t => {
+      updates['tools/' + t.id] = {...t, cat:'อื่นๆ'};
+    });
+    db.ref().update(updates);
+  }
+  catsRef.child(cat.key).remove();
+  showToast(`🗑️ ลบหมวดหมู่ "${name}" แล้ว`);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOOL NUMBER HELPERS
+═══════════════════════════════════════════════════════════ */
+function checkDupName() {
+  const name = document.getElementById('f-name').value.trim().toLowerCase();
+  const editId = document.getElementById('edit-id').value;
+  if(!name) { document.getElementById('num-hint').classList.remove('show'); return; }
+  const dups = tools.filter(t => t.name.toLowerCase() === name && t.id !== editId);
+  const hint = document.getElementById('num-hint');
+  const hintTxt = document.getElementById('num-hint-txt');
+  if(dups.length > 0) {
+    const nums = dups.map(t => t.toolNum ? `#${t.toolNum}` : '(ไม่มีหมายเลข)').join(', ');
+    hintTxt.textContent = `มีอยู่แล้ว ${dups.length} อัน: ${nums} — กด ⚡ เพื่อใส่หมายเลขถัดไปอัตโนมัติ`;
+    hint.classList.add('show');
+  } else {
+    hint.classList.remove('show');
+  }
+}
+
+function autoAssignNum() {
+  const name = document.getElementById('f-name').value.trim().toLowerCase();
+  const editId = document.getElementById('edit-id').value;
+  if(!name) { showToast('⚠️ กรุณาใส่ชื่ออุปกรณ์ก่อน'); return; }
+  const dups = tools.filter(t => t.name.toLowerCase() === name && t.id !== editId);
+  const usedNums = dups.map(t => t.toolNum).filter(Boolean);
+  const intNums = usedNums.map(n => parseInt(n)).filter(n => !isNaN(n));
+  let next;
+  if(intNums.length > 0) {
+    next = (Math.max(...intNums) + 1).toString();
+  } else if(dups.length > 0) {
+    next = (dups.length + 1).toString();
+  } else {
+    next = '1';
+  }
+  document.getElementById('f-num').value = next;
+  showToast(`✅ ใส่หมายเลข #${next} แล้ว`);
+}
+
+rebuildCatUI();
+renderList();
 </script>
 </body>
 </html>
-
 
